@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajuda — GTK Elétrica e Info</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="ajuda">
+
+  <header class="site-header"><div id="site-header"></div></header>
+
+  <main>
+    <section class="page-hero" style="padding-bottom:20px">
+      <div class="container">
+        <span class="eyebrow">Central de ajuda</span>
+        <h1>Como podemos ajudar?</h1>
+        <p>Perguntas frequentes sobre agendamento, orçamento, pagamento e conta.</p>
+      </div>
+    </section>
+
+    <section style="padding-top:12px">
+      <div class="container">
+        <div class="help-cats" id="help-cats"></div>
+        <div id="faq-list" style="max-width:720px"></div>
+
+        <div class="hero-panel" style="background:var(--surface); border:1px solid var(--border); margin-top:36px; padding:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:16px; margin-bottom:4px">Não achou sua resposta?</h3>
+            <p style="font-size:13px; color:var(--ink-muted)">Fale direto com a equipe GTK pelo WhatsApp.</p>
+          </div>
+          <a href="#" class="btn whatsapp" id="ajuda-wa">Chamar no WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div id="site-footer"></div></footer>
+  <div id="wa-float-root"></div>
+  <div id="toast-root"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/darkmode.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/header.js"></script>
+  <script src="js/ajuda.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("ajuda-wa").href = gtkWhatsappLink("Olá! Tenho uma dúvida sobre o site da GTK.");
+    });
+  </script>
+</body>
+</html>

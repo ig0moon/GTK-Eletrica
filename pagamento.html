@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendamento e pagamento — GTK Elétrica e Info</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="carrinho">
+
+  <header class="site-header"><div id="site-header"></div></header>
+
+  <main>
+    <section class="page-hero" style="padding-bottom:12px">
+      <div class="container">
+        <span class="eyebrow">Agendamento</span>
+        <h1>Finalize seu agendamento</h1>
+      </div>
+    </section>
+
+    <section style="padding-top:12px">
+      <div class="container" id="checkout-form-area">
+        <div class="checkout-steps">
+          <div class="step active" id="step-indicator-1">1 · Revisar itens</div>
+          <div class="step" id="step-indicator-2">2 · Escolher horário</div>
+          <div class="step" id="step-indicator-3">3 · Dados &amp; confirmação</div>
+        </div>
+
+        <!-- ETAPA 1 -->
+        <div class="checkout-step-panel active" id="step-panel-1">
+          <div id="review-list"></div>
+          <div style="display:flex; justify-content:flex-end; margin-top:20px">
+            <button class="btn primary" onclick="goToStep(2)">Escolher horário →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 2 -->
+        <div class="checkout-step-panel" id="step-panel-2">
+          <div id="checkout-calendar"></div>
+          <div style="display:flex; justify-content:space-between; margin-top:20px">
+            <button class="btn ghost" onclick="goToStep(1)">← Voltar</button>
+            <button class="btn primary" onclick="goToStep(3)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 3 -->
+        <div class="checkout-step-panel" id="step-panel-3">
+          <p class="mono" style="font-size:13px; color:var(--ink-muted); margin-bottom:18px">
+            Horário selecionado: <strong id="selected-slot-summary" style="color:var(--ink)"></strong>
+          </p>
+
+          <div class="field">
+            <label>Nome completo</label>
+            <input type="text" id="chk-nome" placeholder="Seu nome">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Telefone / WhatsApp</label>
+              <input type="text" id="chk-telefone" placeholder="(41) 90000-0000">
+            </div>
+            <div class="field">
+              <label>Endereço do atendimento</label>
+              <input type="text" id="chk-endereco" placeholder="Rua, número, bairro">
+            </div>
+          </div>
+          <div class="field">
+            <label>Observações (opcional)</label>
+            <textarea id="chk-obs" rows="3" placeholder="Algo que o técnico precise saber antes de chegar?"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Forma de pagamento</label>
+            <div class="payment-methods">
+              <div class="payment-method" onclick="selectPaymentMethod('Pix', this)">Pix<span class="sub">na confirmação</span></div>
+              <div class="payment-method" onclick="selectPaymentMethod('Cartão', this)">Cartão<span class="sub">no dia do serviço</span></div>
+              <div class="payment-method" onclick="selectPaymentMethod('Dinheiro', this)">Dinheiro<span class="sub">no dia do serviço</span></div>
+            </div>
+            <p style="font-size:11.5px; color:var(--ink-muted); margin-top:8px">Integração com gateway de pagamento em breve — por enquanto o pagamento é combinado com o técnico.</p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin-top:20px">
+            <button class="btn ghost" onclick="goToStep(2)">← Voltar</button>
+            <button class="btn primary" onclick="confirmBooking()">Confirmar agendamento</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container hidden" id="checkout-success">
+        <div class="empty-state" style="max-width:520px; margin:0 auto">
+          <div class="icon-box" style="background:var(--success-bg); color:var(--success)">✓</div>
+          <h3 style="margin-bottom:8px">Agendamento confirmado!</h3>
+          <p id="success-summary"></p>
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px">
+            <button class="btn primary" onclick="downloadOrcamentoPDF()">Baixar orçamento em PDF</button>
+            <a href="#" class="btn whatsapp" id="success-wa">Confirmar no WhatsApp</a>
+            <a href="index.html" class="btn ghost">Voltar ao início</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div id="site-footer"></div></footer>
+  <div id="wa-float-root"></div>
+  <div id="toast-root"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/darkmode.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/header.js"></script>
+  <script src="js/calendario.js"></script>
+  <script src="js/pagamento.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("success-wa").href = gtkWhatsappLink("Olá! Acabei de confirmar um agendamento pelo site da GTK.");
+    });
+  </script>
+</body>
+</html>

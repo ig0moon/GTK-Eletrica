@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTK Elétrica e Info — Agende eletricista ou técnico de T.I.</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="inicio">
+
+  <header class="site-header"><div id="site-header"></div></header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">⚡ GTK Elétrica &amp; Info · Ponta Grossa e região</span>
+
+          <div style="margin-top:18px">
+            <div class="breaker" id="hero-breaker">
+              <input type="radio" name="hero-breaker" id="breaker-elec" checked onchange="setHeroCatalog('elec')">
+              <input type="radio" name="hero-breaker" id="breaker-ti" onchange="setHeroCatalog('ti')">
+              <label for="breaker-elec">Elétrica</label>
+              <label for="breaker-ti">T.I</label>
+              <span class="slider"></span>
+            </div>
+          </div>
+
+          <h1>Da tomada ao roteador,<br>a gente <span class="flicker" id="hero-flicker">resolve</span>.</h1>
+          <p class="lead">Agende um eletricista ou um técnico de T.I em poucos cliques. Escolha o serviço, marque o horário no calendário e receba o orçamento em PDF antes de fechar.</p>
+
+          <div class="hero-ctas">
+            <a href="catalogo.html#elec" class="btn elec lg" id="hero-cta">Ver catálogo de elétrica</a>
+            <a href="#" class="btn whatsapp lg" id="hero-wa">
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="#fff"><path d="M16.001 3C9.373 3 4 8.373 4 15c0 2.383.7 4.6 1.902 6.463L4 29l7.72-1.862A11.93 11.93 0 0 0 16.001 27C22.63 27 28 21.627 28 15S22.63 3 16.001 3zm0 21.7c-1.98 0-3.82-.55-5.393-1.503l-.386-.23-4.58 1.104 1.13-4.463-.252-.398A9.66 9.66 0 0 1 5.3 15c0-5.906 4.794-10.7 10.7-10.7S26.7 9.094 26.7 15 21.907 24.7 16.001 24.7zm5.86-8.02c-.32-.16-1.89-.933-2.183-1.04-.293-.107-.507-.16-.72.16-.213.32-.826 1.04-1.013 1.253-.187.213-.373.24-.693.08-.32-.16-1.35-.497-2.573-1.587-.951-.848-1.593-1.895-1.78-2.215-.187-.32-.02-.493.14-.653.144-.143.32-.373.48-.56.16-.187.213-.32.32-.533.107-.213.053-.4-.027-.56-.08-.16-.72-1.733-.986-2.373-.26-.626-.524-.54-.72-.55l-.613-.01c-.213 0-.56.08-.853.4-.293.32-1.12 1.093-1.12 2.666s1.146 3.093 1.306 3.307c.16.213 2.253 3.44 5.46 4.826.763.33 1.359.527 1.823.674.766.244 1.463.21 2.014.127.614-.092 1.89-.773 2.157-1.52.267-.746.267-1.386.187-1.52-.08-.133-.293-.213-.613-.373z"/></svg>
+              Chamar no WhatsApp
+            </a>
+          </div>
+
+          <div class="hero-tickets">
+            <span class="ticket">🔧 Atendimento em domicílio</span>
+            <span class="ticket">📄 Orçamento em PDF</span>
+            <span class="ticket">🗓️ Horário confirmado na hora</span>
+          </div>
+        </div>
+
+        <div class="hero-panel" id="hero-panel">
+          <div class="panel-row"><span>Elétrica — hoje</span><span class="mono"><span class="dot"></span> Disponível</span></div>
+          <div class="panel-row"><span>T.I — hoje</span><span class="mono"><span class="dot"></span> Disponível</span></div>
+          <div class="panel-row"><span>Emergências</span><span class="mono">resposta em até 2h</span></div>
+          <div class="panel-row"><span>Região atendida</span><span class="mono">Ponta Grossa e RMC</span></div>
+          <div class="panel-row"><span>Orçamento</span><span class="mono">sem compromisso</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Como funciona</span>
+          <h2>Do clique ao técnico na porta, em quatro passos.</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="icon-box" style="background:var(--surface-alt)">1</div>
+            <h3>Escolha o serviço</h3>
+            <p>Navegue pelo catálogo de elétrica ou de T.I. e adicione ao carrinho.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box" style="background:var(--surface-alt)">2</div>
+            <h3>Marque o horário</h3>
+            <p>Veja os horários disponíveis no calendário e escolha o que encaixa na sua agenda.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box" style="background:var(--surface-alt)">3</div>
+            <h3>Receba o orçamento</h3>
+            <p>Baixe o orçamento em PDF com os itens e o valor antes de confirmar.</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-box" style="background:var(--surface-alt)">4</div>
+            <h3>Técnico confirmado</h3>
+            <p>Um eletricista ou técnico de T.I da GTK vai até você no horário marcado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Dois catálogos, um só agendamento</span>
+          <h2>Cuidamos da instalação e do que roda nela.</h2>
+        </div>
+        <div class="feature-grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+          <a href="catalogo.html#elec" class="feature-card elec" style="text-decoration:none">
+            <div class="icon-box">⚡</div>
+            <h3>Elétrica</h3>
+            <p>Tomadas, quadro elétrico, câmeras, campainhas, lâmpadas, chuveiros e torneiras elétricas.</p>
+          </a>
+          <a href="catalogo.html#ti" class="feature-card ti" style="text-decoration:none">
+            <div class="icon-box">💻</div>
+            <h3>T.I.</h3>
+            <p>Formatação e manutenção de PCs, roteadores, switches e rede cabeada.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="hero-panel" style="background:var(--ink); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; padding:32px 30px;">
+          <div>
+            <h3 style="color:#fff; font-size:20px; margin-bottom:6px">Precisa de atendimento hoje?</h3>
+            <p style="color:rgba(255,255,255,.7); font-size:13.5px">Fale com a gente no WhatsApp ou veja os horários livres no catálogo.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <a href="catalogo.html" class="btn primary">Ver catálogo</a>
+            <a href="#" class="btn whatsapp" id="cta-wa-2">Chamar no WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div id="site-footer"></div></footer>
+  <div id="wa-float-root"></div>
+  <div id="toast-root"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/darkmode.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/header.js"></script>
+  <script>
+    function setHeroCatalog(cat) {
+      const isElec = cat === "elec";
+      const cta = document.getElementById("hero-cta");
+      const flicker = document.getElementById("hero-flicker");
+      const panel = document.getElementById("hero-panel");
+      cta.textContent = isElec ? "Ver catálogo de elétrica" : "Ver catálogo de T.I.";
+      cta.href = isElec ? "catalogo.html#elec" : "catalogo.html#ti";
+      cta.classList.toggle("elec", isElec);
+      cta.classList.toggle("ti", !isElec);
+      flicker.textContent = isElec ? "resolve" : "conecta";
+      flicker.style.color = isElec ? "var(--elec)" : "var(--ti)";
+      panel.style.borderLeft = `4px solid ${isElec ? "var(--elec)" : "var(--ti)"}`;
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const wa = gtkWhatsappLink();
+      document.getElementById("hero-wa").href = wa;
+      document.getElementById("cta-wa-2").href = wa;
+    });
+  </script>
+</body>
+</html>

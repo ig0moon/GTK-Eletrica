@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de serviços — GTK Elétrica e Info</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="catalogo">
+
+  <header class="site-header"><div id="site-header"></div></header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow">Catálogo</span>
+        <h1>Dois catálogos. Um só carrinho.</h1>
+        <p>Escolha os serviços de elétrica e de T.I que precisa ou combine os dois no mesmo agendamento.</p>
+
+        <div style="margin-top:24px">
+          <div class="breaker" id="cat-breaker">
+            <input type="radio" name="cat-breaker" id="breaker-elec" checked onchange="setBreakerScroll('elec')">
+            <input type="radio" name="cat-breaker" id="breaker-ti" onchange="setBreakerScroll('ti')">
+            <label for="breaker-elec"><span class="led"></span>Elétrica</label>
+            <label for="breaker-ti"><span class="led"></span>T.I.</label>
+            <span class="slider"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="elec" style="padding-top:16px">
+      <div class="container">
+        <div class="catalog-section-title elec">
+          <span>⚡ Elétrica</span>
+          <span class="tag">residencial &amp; comercial</span>
+        </div>
+        <div class="service-grid" id="grid-elec"></div>
+      </div>
+    </section>
+
+    <section id="ti" style="padding-top:0">
+      <div class="container">
+        <div class="catalog-section-title ti">
+          <span>💻 T.I</span>
+          <span class="tag">PCs, redes &amp; suporte</span>
+        </div>
+        <div class="service-grid" id="grid-ti"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div id="site-footer"></div></footer>
+  <div id="wa-float-root"></div>
+  <div id="toast-root"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/darkmode.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/header.js"></script>
+  <script src="js/catalog-data.js"></script>
+  <script src="js/catalogo.js"></script>
+</body>
+</html>
