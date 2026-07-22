@@ -54,17 +54,39 @@ function capitalize(str) {
 }
 
 async function refreshAuthHeaderState() {
-  const btn = document.getElementById("auth-header-btn");
-  if (!btn) return;
-  
+  const authArea = document.getElementById("auth-header-area");
+  const footerLinks = document.getElementById("footer-account-links");
+
   const user = await getSession();
-  
-  if (user) {
-    btn.textContent = `${user.nome.split(" ")[0]} · Sair`;
-    btn.onclick = logout;
-  } else {
-    btn.textContent = "Entrar";
-    btn.onclick = () => openAuthModal("login");
+
+  // HEADER
+  if (authArea) {
+    if (user) {
+      authArea.innerHTML = `
+        <div class="header-controls">
+          <a href="conta.html" class="icon-circle-btn"><span class="material-symbols-outlined">person</span></a>
+          <button class="icon-circle-btn"  onclick="logout()"><span class="material-symbols-outlined">logout</span></button>
+        </div>
+      `;
+    } else {
+      authArea.innerHTML = `
+        <button class="btn sm" onclick="openAuthModal('login')">Entrar</button>
+      `;
+    }
+  }
+
+  // FOOTER
+  if (footerLinks) {
+    if (user) {
+      footerLinks.innerHTML = `
+        <a href="conta.html">Minha Conta</a>
+      `;
+    } else {
+      footerLinks.innerHTML = `
+        <a href="#" onclick="openAuthModal('login'); return false;">Entrar</a>
+        <a href="#" onclick="openAuthModal('register'); return false;">Criar conta</a>
+      `;
+    }
   }
 }
 

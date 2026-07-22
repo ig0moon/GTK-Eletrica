@@ -41,7 +41,9 @@ function renderHeader() {
           <span id="cart-count" class="cart-badge hidden">0</span>
         </a>
 
-        <button class="btn sm" id="auth-header-btn" onclick="openAuthModal()">Entrar</button>
+        <div id="auth-header-area">
+          <button class="btn sm" onclick="openAuthModal('login')">Entrar</button>
+        </div>
 
         <button class="hamburger" onclick="toggleMobileNav()" title="Menu">☰</button>
       </div>
@@ -83,8 +85,10 @@ function renderFooter() {
         </div>
         <div>
           <h5>Conta</h5>
-          <a href="#" onclick="openAuthModal('login'); return false;">Entrar</a>
-          <a href="#" onclick="openAuthModal('register'); return false;">Criar conta</a>
+          <div id="footer-account-links">
+            <a href="#" onclick="openAuthModal('login'); return false;">Entrar</a>
+            <a href="#" onclick="openAuthModal('register'); return false;">Criar conta</a>
+          </div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -107,7 +111,6 @@ function renderWhatsappFloat() {
   `;
 }
 
-// Toast simples, reaproveitado por cart.js e outras páginas
 function showToast(message, duration = 2600) {
   let toast = document.getElementById("toast");
   if (!toast) {
