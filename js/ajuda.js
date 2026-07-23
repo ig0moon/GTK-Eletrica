@@ -6,7 +6,6 @@ const FAQ = [
   { cat: "orcamento", q: "O valor final pode mudar?", a: "Os preços do catálogo são \"a partir de\". O valor final é confirmado após a vistoria técnica no local." },
   { cat: "pagamento", q: "Quais formas de pagamento são aceitas?", a: "Pix, cartão e dinheiro, combinados diretamente com o técnico no dia do atendimento. Pagamento online chega em breve." },
   { cat: "conta", q: "Preciso criar conta para agendar?", a: "Recomendamos criar uma conta para acompanhar seus agendamentos, mas o cadastro é rápido — nome, e-mail e senha." },
-  { cat: "conta", q: "Qual a diferença entre cliente, colaborador e admin?", a: "Cliente agenda serviços; colaborador é o técnico que atende os chamados; admin gerencia o catálogo e as permissões do sistema." },
 ];
 
 const CATS = [
