@@ -33,7 +33,7 @@ function renderHeader() {
 
       <div class="header-controls">
         <button class="icon-circle-btn" onclick="toggleDarkMode()" title="Alternar modo escuro">
-          <span id="theme-icon" class="material-symbols-outlined" style="font-size:19px">dark_mode</span>
+          <span id="theme-icon" class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
         </button>
 
         <a href="carrinho.html" class="icon-circle-btn" title="Carrinho">
@@ -52,7 +52,6 @@ function renderHeader() {
 
   updateThemeIcon();
   updateCartBadge();
-  refreshAuthHeaderState();
 }
 
 function toggleMobileNav() {
@@ -130,4 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHeader();
   renderFooter();
   renderWhatsappFloat();
+
+  // Só agora #auth-header-area E #footer-account-links existem os dois
+  // no DOM, então essa é a hora certa de preencher com o estado de login.
+  if (typeof refreshAuthHeaderState === "function") {
+    refreshAuthHeaderState();
+  }
 });

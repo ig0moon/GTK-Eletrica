@@ -35,7 +35,7 @@
             }
           }
         } catch(e) {
-           console.log("Aguardando auth.js...", e);
+          console.log("Aguardando auth.js...", e);
         }
       }, 500);
     });

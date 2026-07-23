@@ -1,39 +1,82 @@
 // ============================================================
 // CALENDÁRIO DE AGENDAMENTO
-// ------------------------------------------------------------
-// Protótipo front-end: disponibilidade é simulada aqui (sem
-// finais de semana, sem datas passadas, e alguns horários
-// sorteados como já ocupados). Em produção, troque
-// getAvailableSlots(date) por uma consulta à tabela
-// `agendamentos` no Supabase, filtrando os horários já
-// reservados para aquele técnico/dia.
 // ============================================================
 const MONTH_NAMES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
-const DOW_NAMES = ["dom","seg","ter","qua","qui","sex","sáb"];
+const DOW_NAMES = ["D","S","T","Q","Q","S","S"];
 const ALL_SLOTS = ["08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"];
+const CAL_MAX_POR_HORARIO = 1; // aumente se tiver mais de um técnico por horário
 
 let calState = {
   viewYear: new Date().getFullYear(),
   viewMonth: new Date().getMonth(),
-  selectedDate: null, // "YYYY-MM-DD"
+  selectedDate: null, // "AAAA-MM-DD"
   selectedSlot: null,
   onChange: null,
 };
+
+// map "AAAA-MM-DD" -> { "09:00": quantidade_ocupada, ... }, cache do mês em exibição
+let calBusyMap = {};
 
 function dateKey(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-// disponibilidade determinística (mesma seed sempre gera o mesmo resultado)
-function seedRandom(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
+function injectCompactStyles(containerId) {
+  const styleId = `${containerId}-compact-styles`;
+  if (document.getElementById(styleId)) return;
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `
+    #${containerId} .calendar-card { max-width: 300px; margin: 0 auto; padding: 14px; }
+    #${containerId} .calendar-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    #${containerId} .calendar-head h4 { font-size: 13px; margin: 0; text-transform: capitalize; }
+    #${containerId} .calendar-nav-btn { width: 26px; height: 26px; font-size: 13px; }
+    #${containerId} .calendar-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    #${containerId} .dow { text-align:center; font-size: 10px; color: var(--ink-muted); padding-bottom: 3px; }
+    #${containerId} .day { aspect-ratio: 1; display:flex; align-items:center; justify-content:center; font-size: 12px; border-radius: 6px; }
+    #${containerId} .day.available { cursor: pointer; }
+    #${containerId} .day.available:hover { border: 1px solid var(--border); }
+    #${containerId} .day.unavailable { opacity: .35; }
+    #${containerId} .day.selected { background: var(--ink); color: #fff; }
+    #${containerId} .slot-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+    #${containerId} .slot-btn { padding: 7px 4px; font-size: 12px; }
+  `;
+  document.head.appendChild(style);
+}
+
+async function fetchMonthBusyMap(year, month) {
+  const db = window.supabaseClient;
+  if (!db) return {};
+
+  const start = dateKey(year, month, 1);
+  const nextMonthDate = month === 11 ? new Date(year + 1, 0, 1) : new Date(year, month + 1, 1);
+  const end = dateKey(nextMonthDate.getFullYear(), nextMonthDate.getMonth(), 1);
+
+  const { data, error } = await db
+    .from("agendamentos")
+    .select("detalhes")
+    .gte("detalhes->>data", start)
+    .lt("detalhes->>data", end)
+    .not("status", "ilike", "%cancel%");
+
+  if (error) {
+    console.error("Erro ao buscar disponibilidade:", error);
+    return {};
+  }
+
+  const map = {};
+  (data || []).forEach((row) => {
+    const d = row.detalhes || {};
+    if (!d.data || !d.horario) return;
+    map[d.data] = map[d.data] || {};
+    map[d.data][d.horario] = (map[d.data][d.horario] || 0) + 1;
+  });
+  return map;
 }
 
 function getAvailableSlots(key) {
-  const seed = seedRandom(key);
-  return ALL_SLOTS.filter((_, i) => (seed + i * 7) % 5 !== 0);
+  const ocupados = calBusyMap[key] || {};
+  return ALL_SLOTS.filter((s) => (ocupados[s] || 0) < CAL_MAX_POR_HORARIO);
 }
 
 function isDayAvailable(y, m, d) {
@@ -51,10 +94,15 @@ function initCalendar(containerId, onChange) {
   renderCalendar(containerId);
 }
 
-function renderCalendar(containerId) {
+async function renderCalendar(containerId) {
   const root = document.getElementById(containerId);
   if (!root) return;
+  injectCompactStyles(containerId);
+
+  root.innerHTML = `<p style="font-size:12.5px;color:var(--ink-muted);text-align:center;padding:20px 0;">Carregando disponibilidade...</p>`;
+
   const { viewYear, viewMonth } = calState;
+  calBusyMap = await fetchMonthBusyMap(viewYear, viewMonth);
 
   const firstDow = new Date(viewYear, viewMonth, 1).getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -90,21 +138,50 @@ function shiftCalendarMonth(containerId, delta) {
   calState.viewMonth += delta;
   if (calState.viewMonth < 0) { calState.viewMonth = 11; calState.viewYear--; }
   if (calState.viewMonth > 11) { calState.viewMonth = 0; calState.viewYear++; }
+  calState.selectedDate = null;
+  calState.selectedSlot = null;
   renderCalendar(containerId);
+  notifyCalendarChange();
 }
 
 function selectCalendarDay(containerId, key) {
   calState.selectedDate = key;
   calState.selectedSlot = null;
-  renderCalendar(containerId);
+  renderCalendarKeepingBusyMap(containerId);
   notifyCalendarChange();
+}
+
+// re-renderiza a grade sem buscar o mês de novo (já está em cache)
+function renderCalendarKeepingBusyMap(containerId) {
+  const root = document.getElementById(containerId);
+  if (!root) return;
+  const { viewYear, viewMonth } = calState;
+
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  let cells = "";
+  for (let i = 0; i < firstDow; i++) cells += `<div class="day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = dateKey(viewYear, viewMonth, d);
+    const available = isDayAvailable(viewYear, viewMonth, d);
+    const selected = key === calState.selectedDate;
+    cells += `<div class="day ${available ? "available" : "unavailable"} ${selected ? "selected" : ""}"
+                    ${available ? `onclick="selectCalendarDay('${containerId}','${key}')"` : ""}>${d}</div>`;
+  }
+
+  const grid = root.querySelector(".calendar-grid");
+  const dowHTML = DOW_NAMES.map((d) => `<div class="dow">${d}</div>`).join("");
+  if (grid) grid.innerHTML = dowHTML + cells;
+
+  renderSlots(containerId);
 }
 
 function renderSlots(containerId) {
   const slotRoot = document.getElementById(`${containerId}-slots`);
   if (!slotRoot) return;
   if (!calState.selectedDate) {
-    slotRoot.innerHTML = `<p style="margin-top:16px;font-size:12.5px;color:var(--ink-muted)">Escolha um dia disponível para ver os horários.</p>`;
+    slotRoot.innerHTML = `<p style="margin-top:12px;font-size:12px;color:var(--ink-muted)">Escolha um dia disponível para ver os horários.</p>`;
     return;
   }
   const slots = getAvailableSlots(calState.selectedDate);

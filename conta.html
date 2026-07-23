@@ -52,40 +52,9 @@
             <h2>Próximos Serviços</h2>
             <p>Acompanhe o status dos seus pedidos.</p>
           </div>
-          
-          <!-- Exemplo de item agendado (TI) -->
-          <div class="cart-item">
-            <div class="swatch" style="background: var(--ti-bg); color: var(--ti-ink);">
-              <span class="material-symbols-outlined">computer</span>
-            </div>
-            <div class="info">
-              <h4>Manutenção Preventiva de PC</h4>
-              <span>15 de Outubro, 14:00 • Status: <strong>Confirmado</strong></span>
-            </div>
-            <div class="price">R$ 150,00</div>
-          </div>
 
-          <!-- Exemplo de item agendado (Elétrica) -->
-          <div class="cart-item">
-            <div class="swatch" style="background: var(--elec-bg); color: var(--elec-ink);">
-              <span class="material-symbols-outlined">bolt</span>
-            </div>
-            <div class="info">
-              <h4>Instalação de Tomadas e Interruptores</h4>
-              <span>20 de Outubro, 09:00 • Status: <span style="color: var(--warning);">Aguardando técnico</span></span>
-            </div>
-            <div class="price">R$ 80,00</div>
-          </div>
-
-          <!-- Estado Vazio (Descomente se não houver agendamentos) -->
-          <!--
-          <div class="empty-state">
-            <div class="icon-box"><span class="material-symbols-outlined">event_busy</span></div>
-            <h3>Nenhum agendamento</h3>
-            <p>Você ainda não possui serviços marcados conosco.</p>
-            <a href="catalogo.html" class="btn primary" style="margin-top: 16px;">Ver catálogo</a>
-          </div>
-          -->
+          <!-- Preenchido dinamicamente por js/agendamentos.js -->
+          <div id="agendamentos-list"></div>
         </div>
 
         <!-- PAINEL: MEUS DADOS -->
@@ -171,7 +140,7 @@
     </section>
   </main>
 
-  <footer class="site-footer"><div id="site-header"></div></footer> <!-- Substitua os IDs corretos do seu componente de header/footer -->
+  <footer class="site-footer"><div id="site-footer"></div></footer>
   <div id="wa-float-root"></div>
   <div id="toast-root"></div>
 
@@ -187,5 +156,6 @@
 
   <!-- Script específico desta página -->
   <script src="js/conta.js"></script>
+  <script src="js/agendamentos.js"></script>
 </body>
 </html>

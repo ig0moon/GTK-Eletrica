@@ -65,7 +65,7 @@ async function refreshAuthHeaderState() {
       authArea.innerHTML = `
         <div class="header-controls">
           <a href="conta.html" class="icon-circle-btn"><span class="material-symbols-outlined">person</span></a>
-          <button class="icon-circle-btn"  onclick="logout()"><span class="material-symbols-outlined">logout</span></button>
+          <button class="icon-circle-btn" onclick="logout()"><span class="material-symbols-outlined">logout</span></button>
         </div>
       `;
     } else {
@@ -110,7 +110,6 @@ function ensureAuthModal() {
         </div>
         <button class="btn primary block" onclick="handleLogin()">Entrar</button>
         <div class="auth-link">Não tem conta? <a href="#" onclick="openAuthModal('register'); return false;">Cadastre-se</a></div>
-        <p class="role-note">Novas contas entram como <strong>cliente</strong>. Perfis de admin e colaborador são definidos pela equipe GTK.</p>
       </div>
 
       <div class="modal hidden" id="register-box">
@@ -218,11 +217,16 @@ async function handleRegister() {
 // INICIALIZAÇÃO
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  refreshAuthHeaderState();
-
+  // Não chama refreshAuthHeaderState() aqui: nesse momento o footer
+  // (renderizado por header.js) ainda não existe no DOM, então a busca
+  // por #footer-account-links sempre falhava. header.js chama essa
+  // função uma única vez, depois de montar header E footer.
   if (window.supabaseClient) {
     window.supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      // INITIAL_SESSION cobre o caso de navegar entre páginas já logado:
+      // o Supabase restaura a sessão salva e dispara esse evento no
+      // carregamento, mesmo sem um login/logout acontecer agora.
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         refreshAuthHeaderState();
       }
     });
