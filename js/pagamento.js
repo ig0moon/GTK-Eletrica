@@ -142,7 +142,7 @@ window.confirmBooking = async function () {
   const valorTotal = typeof cartTotal === 'function' ? cartTotal() : 0;
 
 const novoAgendamento = {
-    cliente_id: authData.session.user.id, // <--- CORRIGIDO PARA BATER COM SEU SQL
+    cliente_id: authData.session.user.id,
     itens: cartItems,
     total: valorTotal,
     status: 'Aguardando confirmação',
@@ -279,14 +279,32 @@ window.downloadOrcamentoPDF = function () {
 // ============================================================
 // INICIALIZAÇÃO
 // ============================================================
+async function preencherDadosCheckout() {
+  if (typeof getPerfil !== 'function') return;
+
+  const perfil = await getPerfil();
+  if (!perfil) return;
+
+  const nomeEl = document.getElementById("chk-nome");
+  const telEl = document.getElementById("chk-telefone");
+  const endEl = document.getElementById("chk-endereco");
+
+  if (nomeEl && !nomeEl.value && perfil.nome) nomeEl.value = perfil.nome;
+  if (telEl && !telEl.value && perfil.telefone) telEl.value = perfil.telefone;
+
+  if (endEl && !endEl.value && (perfil.logradouro || perfil.bairro)) {
+    const partes = [perfil.logradouro, perfil.bairro, perfil.cep].filter(Boolean);
+    endEl.value = partes.join(" - ");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof initCalendar === "function") {
     initCalendar("checkout-calendar", () => {});
   }
-  
-  // O segredo está aqui: Ele aguarda meio segundo para garantir que o cart.js e o auth.js
-  // terminaram de carregar no navegador antes de tentar puxar os itens para a tela.
+
   setTimeout(() => {
     renderCheckoutSteps();
-  }, 100);
+    preencherDadosCheckout();
+  }, 300);
 });

@@ -17,6 +17,26 @@ window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;
 window.logout = logout;
 window.getSession = getSession;
+window.getPerfil = getPerfil;
+
+// Busca perfil
+async function getPerfil() {
+  if (!window.supabaseClient) return null;
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (!session) return null;
+
+  const { data, error } = await window.supabaseClient
+    .from("perfis")
+    .select("*")
+    .eq("id", session.user.id)
+    .single();
+
+  if (error) {
+    console.error("Erro ao buscar perfil:", error);
+    return null;
+  }
+  return data;
+}
 
 // ------------------------------------------------------------
 // LÓGICA DE SESSÃO E AUTH
@@ -123,6 +143,10 @@ function ensureAuthModal() {
           <input type="email" id="reg-email" placeholder="seu@email.com">
         </div>
         <div class="field">
+          <label>Telefone / WhatsApp</label>
+          <input type="number" id="reg-telefone" placeholder="(41) 90000-0000">
+        </div>
+        <div class="field">
           <label>Senha</label>
           <input type="password" id="reg-senha" placeholder="Mínimo de 6 caracteres">
         </div>
@@ -185,6 +209,7 @@ async function handleRegister() {
   const nome = document.getElementById("reg-nome").value.trim();
   const email = document.getElementById("reg-email").value.trim();
   const senha = document.getElementById("reg-senha").value;
+  const telefone = document.getElementById("reg-telefone").value.trim();
 
   if (!nome || !email || senha.length < 6) {
     return showToast("Preencha nome, e-mail e uma senha com 6+ caracteres.");
@@ -196,7 +221,8 @@ async function handleRegister() {
     options: {
       data: {
         nome: capitalize(nome),
-        role: "cliente" 
+        telefone: telefone,
+        role: "cliente"
       }
     }
   });
@@ -205,7 +231,7 @@ async function handleRegister() {
 
   await refreshAuthHeaderState();
   closeAuthModal();
-  
+
   if (data.session === null) {
     showToast(`Conta criada!`);
   } else {

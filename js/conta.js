@@ -1,41 +1,62 @@
-// Função para alternar entre as abas da conta
-    function switchTab(tabId) {
-      // 1. Remove a classe 'active' de todos os botões
-      document.querySelectorAll('.help-cat').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      // 2. Adiciona 'active' no botão clicado
-      document.getElementById('tab-' + tabId).classList.add('active');
+function switchTab(tabId) {
+  document.querySelectorAll('.help-cat').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  document.querySelectorAll('.conta-panel').forEach(panel => panel.classList.add('hidden'));
+  document.getElementById('panel-' + tabId).classList.remove('hidden');
+}
 
-      // 3. Esconde todos os painéis
-      document.querySelectorAll('.conta-panel').forEach(panel => {
-        panel.classList.add('hidden');
-      });
-      // 4. Mostra o painel correto
-      document.getElementById('panel-' + tabId).classList.remove('hidden');
-    }
+async function carregarDadosConta() {
+  const user = await window.getSession();
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
 
-    // Carregar dados do usuário assim que a tela abrir
-    document.addEventListener("DOMContentLoaded", () => {
-      // Pequeno timeout ou Listener dependendo de como você expôs o getSession no JS modular
-      setTimeout(async () => {
-        // Se a função getSession existir globalmente ou você conseguir acessá-la:
-        try {
-          // O auth.js (novo) tem o getSession, vamos pegar os dados lá
-          // Obs: se getSession não for global, adapte para export/import
-          if(window.getSession) {
-            const user = await window.getSession();
-            if(user) {
-              document.getElementById('user-greeting').textContent = `Olá, ${user.nome.split(" ")[0]}`;
-              document.getElementById('conta-nome').value = user.nome;
-              document.getElementById('conta-email').value = user.email;
-            } else {
-              // Redireciona para home se tentar acessar a conta deslogado
-              window.location.href = 'index.html'; 
-            }
-          }
-        } catch(e) {
-          console.log("Aguardando auth.js...", e);
-        }
-      }, 500);
-    });
+  document.getElementById('user-greeting').textContent = `Olá, ${user.nome.split(" ")[0]}`;
+  document.getElementById('conta-email').value = user.email;
+
+  const perfil = await window.getPerfil();
+  if (perfil) {
+    document.getElementById('conta-nome').value = perfil.nome || user.nome || '';
+    document.getElementById('conta-tel').value = perfil.telefone || '';
+    document.getElementById('conta-cep').value = perfil.cep || '';
+    document.getElementById('conta-bairro').value = perfil.bairro || '';
+    document.getElementById('conta-endereco').value = perfil.logradouro || '';
+  } else {
+    document.getElementById('conta-nome').value = user.nome || '';
+  }
+}
+
+window.salvarDados = async function () {
+  if (!window.supabaseClient) return showToast("Erro: Supabase não conectado.");
+
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (!session) return showToast("Sessão expirada. Faça login novamente.");
+
+  const nome = document.getElementById('conta-nome').value.trim();
+  const telefone = document.getElementById('conta-tel').value.trim();
+  const cep = document.getElementById('conta-cep').value.trim();
+  const bairro = document.getElementById('conta-bairro').value.trim();
+  const logradouro = document.getElementById('conta-endereco').value.trim();
+
+  // Atualiza a tabela perfis
+  const { error: perfilError } = await window.supabaseClient
+    .from('perfis')
+    .update({ nome, telefone, cep, bairro, logradouro, updated_at: new Date().toISOString() })
+    .eq('id', session.user.id);
+
+  if (perfilError) {
+    console.error(perfilError);
+    return showToast("Erro ao salvar dados.");
+  }
+
+  // Mantém o nome sincronizado no user_metadata (usado no header/saudação)
+  await window.supabaseClient.auth.updateUser({ data: { nome, telefone } });
+
+  showToast("Dados salvos com sucesso!");
+  document.getElementById('user-greeting').textContent = `Olá, ${nome.split(" ")[0]}`;
+}; 
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(carregarDadosConta, 500);
+});
