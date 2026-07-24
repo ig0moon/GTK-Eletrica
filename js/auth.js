@@ -119,6 +119,10 @@ function ensureAuthModal() {
           <input type="text" id="reg-nome" placeholder="Como quer ser chamado?">
         </div>
         <div class="field">
+          <label>Telefone</label>
+          <input type="numer" id="reg-telef" placeholder="(01-23456-7890)">
+        </div>
+        <div class="field">
           <label>E-mail</label>
           <input type="email" id="reg-email" placeholder="seu@email.com">
         </div>
@@ -184,10 +188,11 @@ async function handleRegister() {
 
   const nome = document.getElementById("reg-nome").value.trim();
   const email = document.getElementById("reg-email").value.trim();
+  const email = document.getElementById("reg-telef").value.trim();
   const senha = document.getElementById("reg-senha").value;
 
-  if (!nome || !email || senha.length < 6) {
-    return showToast("Preencha nome, e-mail e uma senha com 6+ caracteres.");
+  if (!nome || !email || !telefone || senha.length < 6) {
+    return showToast("Preencha nome, telefone, e-mail e uma senha com 6+ caracteres.");
   }
 
   const { data, error } = await window.supabaseClient.auth.signUp({
@@ -207,7 +212,7 @@ async function handleRegister() {
   closeAuthModal();
   
   if (data.session === null) {
-    showToast(`Conta criada! Verifique sua caixa de entrada de ${email} para confirmar.`);
+    showToast(`Conta criada!`);
   } else {
     showToast(`Conta criada! Bem-vindo, ${capitalize(nome).split(" ")[0]}.`);
   }
