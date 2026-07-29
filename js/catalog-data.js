@@ -119,6 +119,14 @@ const CATALOG = [
     desc: "Instalação de programas, remoção de vírus e ajustes gerais.",
     price: 70,
   },
+  {
+    id: "ti-3d",
+    category: "ti",
+    icon: "<span class='material-symbols-rounded'>print</span>",
+    name: "Impressão 3D",
+    desc: "Impressão de arquivos .STL e outros.",
+    price: "A combinar",
+  },
 ];
 
 function getCatalogByCategory(cat) {
