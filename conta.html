@@ -116,9 +116,11 @@
                     pattern="[0-9]*"
                   />
                   <script>
-                    document.getElementById("conta-tel").addEventListener("input", function () {
-                      this.value = this.value.replace(/[^0-9()+\- ]/g, "");
-                    });
+                    document
+                      .getElementById("conta-tel")
+                      .addEventListener("input", function () {
+                        this.value = this.value.replace(/[^0-9()+\- ]/g, "");
+                      });
                   </script>
                 </div>
               </div>
@@ -247,12 +249,7 @@
                 <button
                   class="btn"
                   style="border-color: var(--danger); color: var(--danger)"
-                  onclick="
-                    if (typeof logout === 'function') {
-                      logout();
-                      window.location.href = 'index.html';
-                    }
-                  "
+                  onclick="if (typeof logout === 'function') logout();"
                 >
                   <span
                     class="material-symbols-outlined"

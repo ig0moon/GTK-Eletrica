@@ -62,11 +62,8 @@ async function logout() {
   }
   await refreshAuthHeaderState();
   if (typeof showToast === "function") showToast("Sessão encerrada.");
-  
-  // Redireciona para a home se o usuário der logout dentro da conta
-  if (document.body.getAttribute('data-page') === 'conta') {
-      window.location.href = 'index.html';
-  }
+
+  window.location.href = "index.html";
 }
 
 function capitalize(str) {
