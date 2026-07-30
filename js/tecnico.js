@@ -28,7 +28,16 @@ async function verificarAcessoTecnico() {
   if (typeof getPerfil !== "function") return null;
   const perfil = await getPerfil();
 
-  if (!perfil || perfil.cargo !== "colaborador") {
+  if (!perfil) {
+    window.location.href = "index.html";
+    return null;
+  }
+
+  if (perfil.cargo === "admin") {
+    return perfil; // admin sempre passa, não precisa de especialidade
+  }
+
+  if (perfil.cargo !== "colaborador") {
     window.location.href = "index.html";
     return null;
   }
@@ -54,11 +63,16 @@ function preencherCabecalho(perfil) {
     nomeEl.textContent = perfil.nome
       ? `Olá, ${perfil.nome.split(" ")[0]}`
       : "Painel do Técnico";
+
   if (labelEl) {
-    labelEl.textContent =
-      perfil.especialidade === "elec"
-        ? "Área do Técnico · Elétrica"
-        : "Área do Técnico · T.I.";
+    if (perfil.cargo === "admin") {
+      labelEl.textContent = "Área do Técnico · Administrador";
+    } else {
+      labelEl.textContent =
+        perfil.especialidade === "elec"
+          ? "Área do Técnico · Elétrica"
+          : "Área do Técnico · T.I.";
+    }
   }
 }
 
@@ -78,7 +92,14 @@ async function carregarAgendamentos() {
     return;
   }
 
-  const especialidade = tecnicoState.perfil.especialidade;
+  const perfil = tecnicoState.perfil;
+
+  if (perfil.cargo === "admin") {
+    tecnicoState.agendamentos = data || [];
+    return;
+  }
+
+  const especialidade = perfil.especialidade;
   tecnicoState.agendamentos = (data || []).filter((ag) =>
     (ag.itens || []).some((i) => i.category === especialidade),
   );

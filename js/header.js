@@ -17,7 +17,8 @@ function renderHeader() {
   const activePage = document.body.dataset.page || "";
 
   const navHTML = NAV_LINKS.map(
-    (l) => `<a href="${l.href}" class="${l.page === activePage ? "active" : ""}">${l.label}</a>`
+    (l) =>
+      `<a href="${l.href}" class="${l.page === activePage ? "active" : ""}">${l.label}</a>`,
   ).join("");
 
   root.innerHTML = `
@@ -32,26 +33,51 @@ function renderHeader() {
       <nav class="main-nav" id="main-nav">${navHTML}</nav>
 
       <div class="header-controls">
-        <button class="icon-circle-btn" onclick="toggleDarkMode()" title="Alternar modo escuro">
-          <span id="theme-icon" class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
-        </button>
+  <button class="icon-circle-btn" onclick="toggleDarkMode()" title="Alternar modo escuro">
+    <span id="theme-icon" class="material-symbols-outlined" style="font-size:20px">dark_mode</span>
+  </button>
 
-        <a href="carrinho.html" class="icon-circle-btn" title="Carrinho">
-          <span id="cart-header" class="material-symbols-outlined">shopping_cart</span>
-          <span id="cart-count" class="cart-badge hidden">0</span>
-        </a>
+  <a href="tecnico.html" class="icon-circle-btn hidden" id="btn-area-tecnico" title="Área do Técnico">
+    <span class="material-symbols-outlined" style="font-size:20px">engineering</span>
+  </a>
 
-        <div id="auth-header-area">
-          <button class="btn sm" onclick="openAuthModal('login')">Entrar</button>
-        </div>
+  <a href="carrinho.html" class="icon-circle-btn" title="Carrinho">
+    <span id="cart-header" class="material-symbols-outlined">shopping_cart</span>
+    <span id="cart-count" class="cart-badge hidden">0</span>
+  </a>
 
-        <button class="hamburger" onclick="toggleMobileNav()" title="Menu">☰</button>
-      </div>
+  <div id="auth-header-area">
+    <button class="btn sm" onclick="openAuthModal('login')">Entrar</button>
+  </div>
+
+  <button class="hamburger" onclick="toggleMobileNav()" title="Menu">☰</button>
+</div>
     </div>
   `;
 
   updateThemeIcon();
   updateCartBadge();
+}
+
+function verificarBotaoTecnico() {
+  if (!window.supabaseClient) return;
+
+  window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    const btnTecnico = document.getElementById("btn-area-tecnico");
+    if (!btnTecnico) return;
+
+    if (!session) {
+      btnTecnico.classList.add("hidden");
+      return;
+    }
+
+    const perfil = typeof getPerfil === "function" ? await getPerfil() : null;
+    const temAcesso =
+      perfil &&
+      ((perfil.cargo === "colaborador" && perfil.especialidade) ||
+        perfil.cargo === "admin");
+    btnTecnico.classList.toggle("hidden", !temAcesso);
+  });
 }
 
 function toggleMobileNav() {
@@ -132,9 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFooter();
   renderWhatsappFloat();
 
-  // Só agora #auth-header-area E #footer-account-links existem os dois
-  // no DOM, então essa é a hora certa de preencher com o estado de login.
   if (typeof refreshAuthHeaderState === "function") {
     refreshAuthHeaderState();
   }
+
+  verificarBotaoTecnico(); // agora só registra o listener, não faz a checagem direto
 });

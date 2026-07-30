@@ -1332,12 +1332,26 @@ CART / CHECKOUT
   font-weight: 500;
   color: var(--ink-muted);
   cursor: pointer;
-  transition: all .15s ease;
+  transition: all 0.15s ease;
 }
 
 .help-cat.active {
   border-color: var(--ti);
   background: var(--ti-bg);
+  color: var(--ink);
+}
+
+.help-cat .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.help-cat.active .material-symbols-outlined {
+  color: var(--ink);
+}
+
+.help-cat:hover {
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .agendamento-card {
@@ -1375,25 +1389,6 @@ CART / CHECKOUT
   gap: 6px;
   font-size: 14px;
   font-weight: 600;
-}
-
-.help-cat .material-symbols-outlined {
-  font-size: 18px;
-}
-
-.help-cat:hover {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-.help-cat.active {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
-}
-
-.help-cat.active .material-symbols-outlined {
-  color: #fff;
 }
 
 .status-badge {
