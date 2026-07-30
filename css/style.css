@@ -1485,6 +1485,7 @@ CART / CHECKOUT
   border: 1px solid var(--border);
   font-size: 13px;
   background: var(--surface, #fff);
+  color: var(--ink);
 }
 
 /* Empty state */
