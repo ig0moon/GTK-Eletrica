@@ -54,7 +54,7 @@ async function fetchMonthBusyMap(year, month) {
 
   const { data, error } = await db
     .from("agendamentos")
-    .select("detalhes")
+    .select("detalhes, itens")
     .gte("detalhes->>data", start)
     .lt("detalhes->>data", end)
     .not("status", "ilike", "%cancel%");
@@ -68,15 +68,36 @@ async function fetchMonthBusyMap(year, month) {
   (data || []).forEach((row) => {
     const d = row.detalhes || {};
     if (!d.data || !d.horario) return;
+
+    // Descobre a(s) categoria(s) presentes nesse agendamento
+    const categorias = new Set((row.itens || []).map((i) => i.category));
+
     map[d.data] = map[d.data] || {};
-    map[d.data][d.horario] = (map[d.data][d.horario] || 0) + 1;
+    map[d.data][d.horario] = map[d.data][d.horario] || { elec: 0, ti: 0 };
+
+    // Se o agendamento tiver serviço elétrico, ocupa uma vaga de elec; se tiver TI, ocupa uma vaga de ti
+    if (categorias.has("elec")) map[d.data][d.horario].elec += 1;
+    if (categorias.has("ti")) map[d.data][d.horario].ti += 1;
   });
   return map;
 }
 
+function getCategoriasNoCarrinho() {
+  const cart = typeof getCart === "function" ? getCart() : [];
+  const categorias = new Set(cart.map((i) => i.category));
+  return categorias;
+}
+
 function getAvailableSlots(key) {
   const ocupados = calBusyMap[key] || {};
-  let slots = ALL_SLOTS.filter((s) => (ocupados[s] || 0) < CAL_MAX_POR_HORARIO);
+  const categoriasCarrinho = getCategoriasNoCarrinho();
+
+  let slots = ALL_SLOTS.filter((s) => {
+    const contagem = ocupados[s] || { elec: 0, ti: 0 };
+    if (categoriasCarrinho.has("elec") && contagem.elec >= 1) return false;
+    if (categoriasCarrinho.has("ti") && contagem.ti >= 1) return false;
+    return true;
+  });
 
   const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
   if (key === todayKey) {

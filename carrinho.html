@@ -57,15 +57,6 @@
   <script src="js/header.js"></script>
   <script src="js/calendario.js"></script>
   <script src="js/pagamento.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Ajuste de prevenção de erro caso não ache o botão de primeira
-      const waBtn = document.getElementById("success-wa");
-      if (waBtn && typeof gtkWhatsappLink === "function") {
-        waBtn.href = gtkWhatsappLink("Olá! Acabei de confirmar um agendamento pelo site da GTK.");
-      }
-    });
-  </script>
 </body>
 </html>
 </body>

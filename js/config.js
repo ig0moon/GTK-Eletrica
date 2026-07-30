@@ -7,7 +7,6 @@ const GTK_CONFIG = {
   whatsappMessage: "Olá! Vim pelo site da GTK Elétrica e Info e gostaria de mais informações.",
 
   // Preencher quando o projeto Supabase estiver criado.
-  // As policies de RLS sugeridas estão em /sql/schema.sql
   supabaseUrl: "https://xiulxcmuktmevzwahgne.supabase.co",
   supabaseAnonKey: "sb_publishable_HPBycOl241NPLVq1P6FFnw_9lqUzuQB",
 };

@@ -118,9 +118,25 @@
   <script src="js/calendario.js"></script>
   <script src="js/pagamento.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("success-wa").href = gtkWhatsappLink("Olá! Acabei de confirmar um agendamento pelo site da GTK.");
-    });
-  </script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const waBtn = document.getElementById("success-wa");
+    if (!waBtn || typeof gtkWhatsappLink !== "function") return;
+
+    const booking = JSON.parse(localStorage.getItem("gtk_last_booking") || "null");
+
+    let mensagem = "Olá! Acabei de confirmar um agendamento pelo site da GTK.";
+
+    if (booking) {
+      const shortId = String(booking.id).substring(0, 8);
+      const fmtDate = typeof formatDatePtBr === "function"
+        ? formatDatePtBr(booking.data)
+        : booking.data;
+
+      mensagem = `Olá! Acabei de confirmar o agendamento #${shortId} pelo site da GTK, agendado para ${fmtDate} às ${booking.horario}.`;
+    }
+
+    waBtn.href = gtkWhatsappLink(mensagem);
+  });
+</script>
 </body>
 </html>
