@@ -7,18 +7,37 @@
  *   { id, cliente_id, itens, total, status,
  *     detalhes: { cliente: {nome, telefone, endereco, obs}, data, horario, pagamento } }
  *
+ * Cards no mesmo padrão visual usado no painel do técnico (tecnico.js),
+ * mas sem controle de status — aqui o cliente só visualiza e pode excluir
+ * agendamentos que ainda não foram concluídos.
+ *
  * Depende de:
  *  - window.supabaseClient (mesmo cliente usado em pagamento.js)
  *  - showToast(msg) — já existe no projeto
- *  - conta.html com um <div id="agendamentos-list"></div> dentro de #panel-agendamentos
+ *  - conta.html com:
+ *      <div id="agendamentos-tabs">
+ *        <button id="tab-ativos" onclick="mudarFiltroAgendamentos('ativos')">Ativos</button>
+ *        <button id="tab-historico" onclick="mudarFiltroAgendamentos('historico')">Histórico</button>
+ *      </div>
+ *      <div id="agendamentos-list"></div>
+ *    dentro de #panel-agendamentos
  */
 
-const AGENDAMENTOS_STATUS_LABEL = {
-  "Aguardando confirmação": { label: "Aguardando confirmação", style: "color: var(--warning, #b8860b);" },
-  "Confirmado": { label: "Confirmado", style: "" },
-  "Aguardando técnico": { label: "Aguardando técnico", style: "color: var(--warning, #b8860b);" },
-  "Concluído": { label: "Concluído", style: "color: var(--success, #1a7f37);" },
-  "Cancelado": { label: "Cancelado", style: "color: var(--danger, #c0392b); text-decoration: line-through;" },
+const AGENDAMENTOS_STATUS_BADGE_CLASS = {
+  "Aguardando confirmação": "aguardando",
+  "Confirmado": "confirmado",
+  "Aguardando técnico": "aguardando",
+  "Em andamento": "andamento",
+  "Concluído": "concluido",
+  "Cancelado": "cancelado",
+};
+
+// status que vão para a aba "Histórico"
+const AGENDAMENTOS_STATUS_HISTORICO = ["Concluído", "Cancelado"];
+
+let agendamentosState = {
+  todos: [],
+  filtroAtivo: "ativos", // "ativos" | "historico"
 };
 
 function agendaToast(msg) {
@@ -34,7 +53,6 @@ function formatBRLLocal(v) {
 
 function formatDataAgendamento(dataStr) {
   if (typeof formatDatePtBr === "function") {
-    // formatDatePtBr espera "AAAA-MM-DD"; se já vier formatada, cai no fallback abaixo
     try {
       const formatada = formatDatePtBr(dataStr);
       if (formatada) return formatada;
@@ -55,55 +73,132 @@ function getAgendamentosContainer() {
   return list;
 }
 
+function isAgendamentoHistorico(ag) {
+  return AGENDAMENTOS_STATUS_HISTORICO.includes(ag.status);
+}
+
+function getAgendamentosFiltrados() {
+  return agendamentosState.todos.filter((ag) =>
+    agendamentosState.filtroAtivo === "historico"
+      ? isAgendamentoHistorico(ag)
+      : !isAgendamentoHistorico(ag),
+  );
+}
+
+// ------------------------------------------------------------
+// ABAS
+// ------------------------------------------------------------
+
+function mudarFiltroAgendamentos(filtro) {
+  agendamentosState.filtroAtivo = filtro;
+  renderAgendamentosTabs();
+  renderAgendamentosView();
+}
+
+function renderAgendamentosTabs() {
+  const tabAtivos = document.getElementById("tab-ativos");
+  const tabHistorico = document.getElementById("tab-historico");
+  if (tabAtivos)
+    tabAtivos.classList.toggle("active", agendamentosState.filtroAtivo === "ativos");
+  if (tabHistorico)
+    tabHistorico.classList.toggle(
+      "active",
+      agendamentosState.filtroAtivo === "historico",
+    );
+}
+
+// ------------------------------------------------------------
+// RENDER
+// ------------------------------------------------------------
+
 function renderAgendamentosEmpty(container) {
+  const historico = agendamentosState.filtroAtivo === "historico";
   container.innerHTML = `
     <div class="empty-state">
-      <div class="icon-box"><span class="material-symbols-outlined">event_busy</span></div>
-      <h3>Nenhum agendamento</h3>
-      <p>Você ainda não possui serviços marcados conosco.</p>
-      <a href="catalogo.html" class="btn primary" style="margin-top: 16px;">Ver catálogo</a>
+      <div class="icon-box"><span class="material-symbols-outlined">${historico ? "history" : "event_busy"}</span></div>
+      <h3>${historico ? "Nenhum histórico" : "Nenhum agendamento"}</h3>
+      <p>${historico ? "Seus agendamentos concluídos ou cancelados aparecerão aqui." : "Você ainda não possui serviços marcados conosco."}</p>
+      ${historico ? "" : '<a href="catalogo.html" class="btn primary" style="margin-top: 16px;">Ver catálogo</a>'}
     </div>
   `;
 }
 
 function renderAgendamentosLista(container, agendamentos) {
+  const historico = agendamentosState.filtroAtivo === "historico";
+
   container.innerHTML = agendamentos
     .map((ag) => {
-      const detalhes = ag.detalhes || {};
-      const primeiroItem = Array.isArray(ag.itens) && ag.itens.length ? ag.itens[0] : null;
-      const categoria = primeiroItem?.category === "elec" ? "elec" : "ti";
-      const icone = primeiroItem?.icon || (categoria === "elec" ? "bolt" : "computer");
-      const titulo =
-        Array.isArray(ag.itens) && ag.itens.length
-          ? ag.itens.map((i) => i.name).join(", ")
-          : "Serviço agendado";
-      const statusInfo = AGENDAMENTOS_STATUS_LABEL[ag.status] || { label: ag.status, style: "" };
-      const podeExcluir = ag.status !== "Concluído";
-      const dataFmt = formatDataAgendamento(detalhes.data);
-      const horario = detalhes.horario || "";
+      const d = ag.detalhes || {};
+      const cliente = d.cliente || {};
+      const fmtDate = formatDataAgendamento(d.data);
+      const shortId = String(ag.id).substring(0, 8);
+      const badgeClass = AGENDAMENTOS_STATUS_BADGE_CLASS[ag.status] || "aguardando";
+      const podeExcluir = !historico && ag.status !== "Concluído";
+
+      const itensHTML = (ag.itens || [])
+        .map((i) => {
+          const valor =
+            typeof i.price === "number" ? formatBRLLocal(i.price) : "A combinar";
+          return `<li><span>${i.name} <strong>×${i.qty}</strong></span><span>${valor}</span></li>`;
+        })
+        .join("");
 
       return `
-      <div class="cart-item" data-agendamento-id="${ag.id}">
-        <div class="swatch" style="background: var(--${categoria}-bg); color: var(--${categoria}-ink);">
-          <span class="material-symbols-outlined">${icone}</span>
+        <div class="agendamento-card" data-agendamento-id="${ag.id}">
+          <div class="agendamento-top">
+            <span class="agendamento-id">#${shortId}</span>
+            <span class="status-badge ${badgeClass}">${ag.status || "-"}</span>
+          </div>
+
+          <div class="agendamento-datahora">
+            <span class="material-symbols-outlined">event</span>
+            ${fmtDate}${d.horario ? ` às ${d.horario}` : ""}
+          </div>
+
+          <div class="agendamento-body" style="margin-top:14px">
+            <div class="info-block">
+              <label>Endereço</label>
+              <span>${cliente.endereco || "-"}</span>
+              ${cliente.obs ? `<br><span style="color:var(--ink-muted)">Obs: ${cliente.obs}</span>` : ""}
+            </div>
+          </div>
+
+          <ul class="agendamento-itens">${itensHTML}</ul>
+
+          <div class="agendamento-footer">
+            <span class="agendamento-total">${formatBRLLocal(ag.total)}</span>
+            ${
+              podeExcluir
+                ? `<button class="btn-excluir-agendamento" title="Excluir agendamento" onclick="excluirAgendamento('${ag.id}')">
+                     <span class="material-symbols-outlined">delete</span>
+                     <span>Excluir</span>
+                   </button>`
+                : ""
+            }
+          </div>
         </div>
-        <div class="info">
-          <h4>${titulo}</h4>
-          <span>${dataFmt}${horario ? `, ${horario}` : ""} • Status: <strong style="${statusInfo.style}">${statusInfo.label}</strong></span>
-        </div>
-        <div class="price">${formatBRLLocal(ag.total)}</div>
-        ${
-          podeExcluir
-            ? `<button class="btn icon-btn sm" title="Excluir agendamento" onclick="excluirAgendamento('${ag.id}')">
-                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-                </button>`
-            : ""
-        }
-      </div>
-    `;
+      `;
     })
     .join("");
 }
+
+function renderAgendamentosView() {
+  const container = getAgendamentosContainer();
+  if (!container) return;
+
+  const lista = getAgendamentosFiltrados();
+
+  if (lista.length === 0) {
+    renderAgendamentosEmpty(container);
+    return;
+  }
+
+  renderAgendamentosLista(container, lista);
+}
+
+// ------------------------------------------------------------
+// CARGA DE DADOS
+// ------------------------------------------------------------
 
 async function carregarAgendamentos() {
   const container = getAgendamentosContainer();
@@ -138,12 +233,9 @@ async function carregarAgendamentos() {
     return;
   }
 
-  if (!data || data.length === 0) {
-    renderAgendamentosEmpty(container);
-    return;
-  }
-
-  renderAgendamentosLista(container, data);
+  agendamentosState.todos = data || [];
+  renderAgendamentosTabs();
+  renderAgendamentosView();
 }
 
 async function excluirAgendamento(id) {
@@ -157,7 +249,11 @@ async function excluirAgendamento(id) {
   } = await db.auth.getSession();
   if (!session) return;
 
-  const { error } = await db.from("agendamentos").delete().eq("id", id).eq("cliente_id", session.user.id);
+  const { error } = await db
+    .from("agendamentos")
+    .delete()
+    .eq("id", id)
+    .eq("cliente_id", session.user.id);
 
   if (error) {
     console.error(error);
@@ -165,15 +261,17 @@ async function excluirAgendamento(id) {
     return;
   }
 
+  agendamentosState.todos = agendamentosState.todos.filter((ag) => ag.id !== id);
+
   const item = document.querySelector(`[data-agendamento-id="${id}"]`);
-  if (item) item.remove();
+  if (item) {
+    item.classList.add("saindo");
+    setTimeout(() => renderAgendamentosView(), 180);
+  } else {
+    renderAgendamentosView();
+  }
 
   agendaToast("Agendamento excluído.");
-
-  const container = document.getElementById("agendamentos-list");
-  if (container && !container.querySelector(".cart-item")) {
-    renderAgendamentosEmpty(container);
-  }
 }
 
 document.addEventListener("DOMContentLoaded", carregarAgendamentos);

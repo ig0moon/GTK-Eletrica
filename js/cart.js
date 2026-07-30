@@ -8,7 +8,7 @@ window.CART_KEY = "gtk_cart";
 // 1. GERENCIAMENTO DE ESTADO (LocalStorage)
 // ------------------------------------------------------------
 
-window.getCart = function() {
+window.getCart = function () {
   try {
     return JSON.parse(localStorage.getItem(window.CART_KEY)) || [];
   } catch {
@@ -16,12 +16,12 @@ window.getCart = function() {
   }
 };
 
-window.saveCart = function(cart) {
+window.saveCart = function (cart) {
   localStorage.setItem(window.CART_KEY, JSON.stringify(cart));
   window.updateCartBadge();
 };
 
-window.addToCart = function(service) {
+window.addToCart = function (service) {
   const cart = window.getCart();
   const existing = cart.find((i) => i.id === service.id);
   if (existing) {
@@ -30,21 +30,22 @@ window.addToCart = function(service) {
     cart.push({ ...service, qty: 1 });
   }
   window.saveCart(cart);
-  if (typeof showToast === "function") showToast(`"${service.name}" adicionado ao carrinho`);
+  if (typeof showToast === "function")
+    showToast(`"${service.name}" adicionado ao carrinho`);
 };
 
-window.removeFromCart = function(id) {
+window.removeFromCart = function (id) {
   window.saveCart(window.getCart().filter((i) => i.id !== id));
   // Atualiza as telas onde o carrinho estiver visível
   if (typeof window.renderCartPage === "function") window.renderCartPage();
-  if (typeof window.renderReviewStep === "function") window.renderReviewStep(); 
+  if (typeof window.renderReviewStep === "function") window.renderReviewStep();
 };
 
-window.changeQty = function(id, delta) {
+window.changeQty = function (id, delta) {
   const cart = window.getCart();
   const item = cart.find((i) => i.id === id);
   if (!item) return;
-  
+
   item.qty += delta;
 
   if (item.qty <= 0) {
@@ -52,33 +53,33 @@ window.changeQty = function(id, delta) {
   } else {
     window.saveCart(cart);
   }
-  
+
   if (typeof window.renderCartPage === "function") window.renderCartPage();
   if (typeof window.renderReviewStep === "function") window.renderReviewStep();
 };
 
-window.clearCart = function() {
+window.clearCart = function () {
   localStorage.removeItem(window.CART_KEY);
   window.updateCartBadge();
   if (typeof window.renderCartPage === "function") window.renderCartPage();
 };
 
-window.cartCount = function() {
+window.cartCount = function () {
   return window.getCart().reduce((sum, i) => sum + i.qty, 0);
 };
 
-window.cartTotal = function() {
+window.cartTotal = function () {
   return window.getCart().reduce((sum, i) => {
     return typeof i.price === "number" ? sum + i.qty * i.price : sum;
   }, 0);
 };
 
-window.formatBRL = function(value) {
+window.formatBRL = function (value) {
   if (typeof value !== "number") return "A combinar";
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
 
-window.cartHasQuoteItems = function() {
+window.cartHasQuoteItems = function () {
   return window.getCart().some((i) => typeof i.price !== "number");
 };
 
@@ -86,7 +87,7 @@ window.cartHasQuoteItems = function() {
 // 2. RENDERIZAÇÃO DA INTERFACE (Página Carrinho)
 // ------------------------------------------------------------
 
-window.updateCartBadge = function() {
+window.updateCartBadge = function () {
   const badge = document.getElementById("cart-count");
   if (!badge) return;
   const count = window.cartCount();
@@ -94,7 +95,7 @@ window.updateCartBadge = function() {
   badge.classList.toggle("hidden", count === 0);
 };
 
-window.renderCartPage = function() {
+window.renderCartPage = function () {
   const listRoot = document.getElementById("cart-list");
   const emptyRoot = document.getElementById("cart-empty");
   const summaryRoot = document.getElementById("cart-summary-body");
@@ -110,7 +111,7 @@ window.renderCartPage = function() {
     listRoot.innerHTML = "";
     emptyRoot.classList.remove("hidden");
     summaryRoot.innerHTML = `<div class="summary-row total"><span>Total</span><span>${window.formatBRL(0)}</span></div>`;
-    
+
     if (checkoutBtn) {
       checkoutBtn.disabled = true;
       checkoutBtn.style.opacity = "0.5";
@@ -120,37 +121,42 @@ window.renderCartPage = function() {
   }
 
   emptyRoot.classList.add("hidden");
-  
+
   if (checkoutBtn) {
     checkoutBtn.disabled = false;
     checkoutBtn.style.opacity = "1";
     checkoutBtn.style.pointerEvents = "auto";
   }
 
-  listRoot.innerHTML = cart.map((item) => `
-    <div class="cart-item">
-      <div class="swatch" style="background:${item.category === "elec" ? "var(--elec-bg)" : "var(--ti-bg)"};color:${item.category === "elec" ? "var(--elec-ink)" : "var(--ti-ink)"}">
-        <span class="material-symbols-outlined">${item.icon}</span>
+  listRoot.innerHTML = cart
+    .map(
+      (item) => `
+  <div class="cart-item">
+    <div class="swatch" style="background:${item.category === "elec" ? "var(--elec-bg)" : "var(--ti-bg)"};color:${item.category === "elec" ? "var(--elec-ink)" : "var(--ti-ink)"}">
+      <span class="material-symbols-outlined">${item.icon}</span>
+    </div>
+    <div class="info">
+      <h4>${item.name}</h4>
+      <span>${window.formatBRL(item.price)} · a partir de</span>
+      <div class="cart-item-actions">
+        <div class="qty-stepper">
+          <button onclick="changeQty('${item.id}', -1)">–</button>
+          <span>${item.qty}</span>
+          <button onclick="changeQty('${item.id}', 1)">+</button>
+        </div>
+        <button class="btn icon-btn sm cart-remove-btn" title="Remover" onclick="removeFromCart('${item.id}')">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
       </div>
-      <div class="info">
-        <h4>${item.name}</h4>
-        <span>${window.formatBRL(item.price)} · a partir de</span>
-      </div>
-      <div class="qty-stepper">
-        <button onclick="changeQty('${item.id}', -1)">–</button>
-        <span>${item.qty}</span>
-        <button onclick="changeQty('${item.id}', 1)">+</button>
-      </div>
-      <button class="btn icon-btn sm" style="border:none; background:transparent" title="Remover" onclick="removeFromCart('${item.id}')">
-        <span class="material-symbols-outlined" style="font-size:18px; color:var(--danger)">delete</span>
-      </button>
-    </div>`
-  ).join("");
+    </div>
+  </div>`,
+    )
+    .join("");
 
   const subtotal = window.cartTotal();
   const temOrcamento = window.cartHasQuoteItems();
   const temItemFixo = window.getCart().some((i) => typeof i.price === "number");
-  
+
   let totalTexto;
   if (temItemFixo && temOrcamento) {
     totalTexto = `${window.formatBRL(subtotal)} + a combinar`;
@@ -161,7 +167,7 @@ window.renderCartPage = function() {
   } else {
     totalTexto = window.formatBRL(0);
   }
-  
+
   summaryRoot.innerHTML = `
     <div class="summary-row"><span>Itens (${window.cartCount()})</span><span>${window.formatBRL(subtotal)}</span></div>
     <div class="summary-row"><span>Visita técnica</span><span>A combinar</span></div>

@@ -208,15 +208,7 @@
                 <button
                   class="btn"
                   id="theme-toggle-btn"
-                  onclick="
-                    document.documentElement.setAttribute(
-                      'data-theme',
-                      document.documentElement.getAttribute('data-theme') ===
-                        'dark'
-                        ? 'light'
-                        : 'dark',
-                    )
-                  "
+                  onclick="toggleDarkMode()"
                 >
                   <span
                     class="material-symbols-outlined"

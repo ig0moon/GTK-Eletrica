@@ -39,7 +39,7 @@ function renderFAQ() {
     <div class="accordion-item" id="faq-${i}">
       <div class="accordion-q" onclick="toggleFAQ(${i})">
         <span>${f.q}</span>
-        <span class="chev">⌄</span>
+        <span class="chev">v</span>
       </div>
       <div class="accordion-a"><div class="accordion-a-inner">${f.a}</div></div>
     </div>`

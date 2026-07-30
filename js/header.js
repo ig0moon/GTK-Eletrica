@@ -164,3 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   verificarBotaoTecnico(); // agora só registra o listener, não faz a checagem direto
 });
+
+function formatDatePtBr(dataStr) {
+  if (!dataStr) return "";
+  const [ano, mes, dia] = dataStr.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
