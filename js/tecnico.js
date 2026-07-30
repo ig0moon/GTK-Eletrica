@@ -1,11 +1,11 @@
 // ============================================================
-// PÁGINA DO TÉCNICO — tecnico.js
+// PAINEL DO TÉCNICO — tecnico.js
 // ============================================================
 
 let tecnicoState = {
   perfil: null,
   agendamentos: [],
-  filtroAtivo: "aguardando", // "aguardando" | "futuros" | "concluidos"
+  filtroAtivo: "aguardando", // "aguardando" | "confirmado" | "andamento" | "concluido" | "cancelado"
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -13,10 +13,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!perfil) return;
 
   tecnicoState.perfil = perfil;
+  preencherCabecalho(perfil);
+
   await carregarAgendamentos();
   renderFiltros();
   renderListaAgendamentos();
 });
+
+// ------------------------------------------------------------
+// ACESSO E PERFIL
+// ------------------------------------------------------------
 
 async function verificarAcessoTecnico() {
   if (typeof getPerfil !== "function") return null;
@@ -28,13 +34,37 @@ async function verificarAcessoTecnico() {
   }
 
   if (!perfil.especialidade) {
-    alert("Seu perfil de técnico ainda não tem uma especialidade definida. Contate o administrador.");
+    if (typeof showToast === "function") {
+      showToast(
+        "Seu perfil ainda não tem especialidade definida. Contate o administrador.",
+      );
+    }
     window.location.href = "index.html";
     return null;
   }
 
   return perfil;
 }
+
+function preencherCabecalho(perfil) {
+  const nomeEl = document.getElementById("tecnico-nome");
+  const labelEl = document.getElementById("tecnico-especialidade-label");
+
+  if (nomeEl)
+    nomeEl.textContent = perfil.nome
+      ? `Olá, ${perfil.nome.split(" ")[0]}`
+      : "Painel do Técnico";
+  if (labelEl) {
+    labelEl.textContent =
+      perfil.especialidade === "elec"
+        ? "Área do Técnico · Elétrica"
+        : "Área do Técnico · T.I.";
+  }
+}
+
+// ------------------------------------------------------------
+// BUSCA DE AGENDAMENTOS
+// ------------------------------------------------------------
 
 async function carregarAgendamentos() {
   const { data, error } = await window.supabaseClient
@@ -50,56 +80,69 @@ async function carregarAgendamentos() {
 
   const especialidade = tecnicoState.perfil.especialidade;
   tecnicoState.agendamentos = (data || []).filter((ag) =>
-    (ag.itens || []).some((i) => i.category === especialidade)
+    (ag.itens || []).some((i) => i.category === especialidade),
   );
 }
 
 function classificarAgendamento(ag) {
   const status = (ag.status || "").toLowerCase();
 
-  if (status === "concluído" || status === "concluido") return "concluidos";
   if (status.includes("aguardando")) return "aguardando";
-
-  // Já confirmado, cancelado entra à parte (não aparece em nenhum filtro por padrão, ou trate como quiser)
-  if (status.includes("cancel")) return "cancelados";
-
-  return "futuros";
+  if (status.includes("andamento")) return "andamento";
+  if (status.includes("conclu")) return "concluido";
+  if (status.includes("cancel")) return "cancelado";
+  if (status.includes("confirmado")) return "confirmado";
+  return "aguardando"; // fallback de segurança, não deveria cair aqui
 }
 
 function getAgendamentosFiltrados() {
   return tecnicoState.agendamentos.filter(
-    (ag) => classificarAgendamento(ag) === tecnicoState.filtroAtivo
+    (ag) => classificarAgendamento(ag) === tecnicoState.filtroAtivo,
   );
 }
 
-function renderFiltros() {
-  const root = document.getElementById("tecnico-filtros");
-  if (!root) return;
+// ------------------------------------------------------------
+// ABAS (mesmo padrão do switchTab de conta.js)
+// ------------------------------------------------------------
 
-  const contagem = { aguardando: 0, futuros: 0, concluidos: 0 };
-  tecnicoState.agendamentos.forEach((ag) => {
-    const grupo = classificarAgendamento(ag);
-    if (contagem[grupo] !== undefined) contagem[grupo] += 1;
-  });
-
-  root.innerHTML = `
-    <button class="filtro-btn ${tecnicoState.filtroAtivo === "aguardando" ? "active" : ""}" onclick="mudarFiltro('aguardando')">
-      Aguardando confirmação (${contagem.aguardando})
-    </button>
-    <button class="filtro-btn ${tecnicoState.filtroAtivo === "futuros" ? "active" : ""}" onclick="mudarFiltro('futuros')">
-      Futuros (${contagem.futuros})
-    </button>
-    <button class="filtro-btn ${tecnicoState.filtroAtivo === "concluidos" ? "active" : ""}" onclick="mudarFiltro('concluidos')">
-      Concluídos (${contagem.concluidos})
-    </button>
-  `;
-}
+const FILTROS_INFO = {
+  aguardando: { titulo: "Aguardando confirmação" },
+  confirmado: { titulo: "Confirmado" },
+  andamento: { titulo: "Em andamento" },
+  concluido: { titulo: "Concluído" },
+  cancelado: { titulo: "Cancelado" },
+};
 
 function mudarFiltro(filtro) {
   tecnicoState.filtroAtivo = filtro;
   renderFiltros();
   renderListaAgendamentos();
 }
+
+function renderFiltros() {
+  ["aguardando", "confirmado", "andamento", "concluido", "cancelado"].forEach(
+    (f) => {
+      const tab = document.getElementById(`tab-${f}`);
+      if (tab) tab.classList.toggle("active", f === tecnicoState.filtroAtivo);
+    },
+  );
+
+  const tituloEl = document.getElementById("tecnico-filtro-titulo");
+  if (tituloEl)
+    tituloEl.textContent = FILTROS_INFO[tecnicoState.filtroAtivo].titulo;
+}
+
+// ------------------------------------------------------------
+// RENDERIZAÇÃO DA LISTA
+// ------------------------------------------------------------
+
+const STATUS_BADGE_CLASS = {
+  "Aguardando confirmação": "aguardando",
+  Confirmado: "confirmado",
+  "Em andamento": "andamento",
+  Concluído: "concluido",
+  Cancelado: "cancelado",
+};
 
 function renderListaAgendamentos() {
   const root = document.getElementById("tecnico-lista");
@@ -108,40 +151,76 @@ function renderListaAgendamentos() {
   const lista = getAgendamentosFiltrados();
 
   if (lista.length === 0) {
-    root.innerHTML = `<p style="color:var(--ink-muted);font-size:13.5px">Nenhum agendamento nesse filtro.</p>`;
+    root.innerHTML = `<p style="color:var(--ink-muted); font-size:13.5px; text-align:center; padding:30px 0">Nenhum agendamento nesse filtro.</p>`;
     return;
   }
 
-  const fmtMoney = typeof formatBRL === "function"
-    ? formatBRL
-    : (v) => (typeof v === "number" ? `R$ ${v.toFixed(2)}` : "A combinar");
+  const fmtMoney =
+    typeof formatBRL === "function"
+      ? formatBRL
+      : (v) => (typeof v === "number" ? `R$ ${v.toFixed(2)}` : "A combinar");
 
   root.innerHTML = lista
     .map((ag) => {
       const d = ag.detalhes || {};
       const cliente = d.cliente || {};
-      const fmtDate = typeof formatDatePtBr === "function" ? formatDatePtBr(d.data) : d.data;
+      const fmtDate =
+        typeof formatDatePtBr === "function" ? formatDatePtBr(d.data) : d.data;
+      const shortId = String(ag.id).substring(0, 8);
+      const badgeClass = STATUS_BADGE_CLASS[ag.status] || "aguardando";
 
       const itensHTML = (ag.itens || [])
-        .map((i) => `<li>${i.name} (x${i.qty}) — ${fmtMoney(i.price)}</li>`)
+        .map((i) => {
+          const valor =
+            typeof i.price === "number" ? fmtMoney(i.price) : "A combinar";
+          return `<li><span>${i.name} <strong>×${i.qty}</strong></span><span>${valor}</span></li>`;
+        })
+        .join("");
+
+      const statusOptions = [
+        "Aguardando confirmação",
+        "Confirmado",
+        "Em andamento",
+        "Concluído",
+        "Cancelado",
+      ]
+        .map(
+          (s) =>
+            `<option value="${s}" ${ag.status === s ? "selected" : ""}>${s}</option>`,
+        )
         .join("");
 
       return `
         <div class="agendamento-card">
-          <div class="agendamento-head">
-            <strong>#${String(ag.id).substring(0, 8)}</strong>
-            <span>${fmtDate} às ${d.horario || "-"}</span>
+          <div class="agendamento-top">
+            <span class="agendamento-id">#${shortId}</span>
+            <span class="status-badge ${badgeClass}">${ag.status || "-"}</span>
           </div>
-          <p><strong>Cliente:</strong> ${cliente.nome || "-"} — ${cliente.telefone || "-"}</p>
-          <p><strong>Endereço:</strong> ${cliente.endereco || "-"}</p>
-          ${cliente.obs ? `<p><strong>Obs:</strong> ${cliente.obs}</p>` : ""}
+
+          <div class="agendamento-datahora">
+            <span class="material-symbols-outlined">event</span>
+            ${fmtDate} às ${d.horario || "-"}
+          </div>
+
+          <div class="agendamento-body" style="margin-top:14px">
+            <div class="info-block">
+              <label>Cliente</label>
+              <span>${cliente.nome || "-"}</span><br>
+              <span>${cliente.telefone || "-"}</span>
+            </div>
+            <div class="info-block">
+              <label>Endereço</label>
+              <span>${cliente.endereco || "-"}</span>
+              ${cliente.obs ? `<br><span style="color:var(--ink-muted)">Obs: ${cliente.obs}</span>` : ""}
+            </div>
+          </div>
+
           <ul class="agendamento-itens">${itensHTML}</ul>
-          <div class="agendamento-status">
+
+          <div class="agendamento-status-row">
             <label>Status:</label>
             <select onchange="handleMudarStatus('${ag.id}', this.value)">
-              ${["Aguardando confirmação", "Confirmado", "Em andamento", "Concluído", "Cancelado"]
-                .map((s) => `<option value="${s}" ${ag.status === s ? "selected" : ""}>${s}</option>`)
-                .join("")}
+              ${statusOptions}
             </select>
           </div>
         </div>`;
@@ -149,21 +228,36 @@ function renderListaAgendamentos() {
     .join("");
 }
 
+// ------------------------------------------------------------
+// ATUALIZAÇÃO DE STATUS
+// ------------------------------------------------------------
+
 async function handleMudarStatus(id, novoStatus) {
-  const { error } = await window.supabaseClient
+  const resultado = await window.supabaseClient
     .from("agendamentos")
     .update({ status: novoStatus })
-    .eq("id", id);
+    .eq("id", id)
+    .select(); // importante: .select() no final pra devolver a linha atualizada
 
-  if (error) {
-    console.error("Erro ao atualizar status:", error);
+  console.log("Resultado do update:", resultado);
+
+  if (resultado.error) {
+    console.error("Erro ao atualizar status:", resultado.error);
     if (typeof showToast === "function") showToast("Erro ao atualizar status.");
+    return;
+  }
+
+  if (!resultado.data || resultado.data.length === 0) {
+    console.warn(
+      "Update não retornou nenhuma linha — provável bloqueio de RLS.",
+    );
+    if (typeof showToast === "function")
+      showToast("Sem permissão para atualizar esse agendamento.");
     return;
   }
 
   if (typeof showToast === "function") showToast("Status atualizado!");
 
-  // Atualiza localmente e re-renderiza
   const ag = tecnicoState.agendamentos.find((a) => a.id === id);
   if (ag) ag.status = novoStatus;
 

@@ -1,91 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sobre — GTK Elétrica e Info</title>
-  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body data-page="sobre">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sobre — GTK Elétrica e Info</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="sobre">
+    <header class="site-header"><div id="site-header"></div></header>
 
-  <header class="site-header"><div id="site-header"></div></header>
-
-  <main>
-    <section class="page-hero">
-      <div class="container">
-        <span class="eyebrow">Sobre a GTK</span>
-        <h1>Elétrica e T.I, atendidas por quem entende dos dois lados do fio.</h1>
-        <p>A GTK Elétrica e Info nasceu para resolver um problema comum: contratar um eletricista para a instalação e outro profissional para configurar o que roda nela. A gente junta os dois num só agendamento.</p>
-      </div>
-    </section>
-
-    <section>
-      <div class="container">
-        <div class="timeline-stat">
-          <div class="stat-box"><div class="num">2</div><div class="lbl">catálogos, elétrica e T.I</div></div>
-          <div class="stat-box"><div class="num">100%</div><div class="lbl">orçamento antes do serviço</div></div>
-          <div class="stat-box"><div class="num">&lt; 2h</div><div class="lbl">resposta em emergências</div></div>
-          <div class="stat-box"><div class="num">RMC</div><div class="lbl">Ponta Grossa e região metropolitana</div></div>
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Sobre a GTK</span>
+          <h1>
+            Elétrica e T.I, atendidas por quem entende dos dois lados do fio.
+          </h1>
+          <p>
+            A GTK Elétrica e Info nasceu para resolver um problema comum:
+            contratar um eletricista para a instalação e outro profissional para
+            configurar o que roda nela. A gente junta os dois num só
+            agendamento.
+          </p>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section style="padding-top:0">
-      <div class="container">
-        <div class="feature-grid">
-          <div class="feature-card elec">
-            <div class="icon-box"><span class="material-symbols-rounded">bolt</span></div>
-            <h3>Instalação</h3>
-            <p>Tomadas, quadros, chuveiros, câmeras e tudo que envolve fiação e segurança elétrica.</p>
-          </div>
-          <div class="feature-card ti">
-            <div class="icon-box"><span class="material-symbols-rounded">computer</span></div>
-            <h3>Configuração</h3>
-            <p>PCs, redes, roteadores e switches — o que faz a instalação elétrica valer a pena.</p>
-          </div>
-          <div class="feature-card">
-            <div class="icon-box" style="background:var(--surface-alt)"><span class="material-symbols-rounded">assignment</span></div>
-            <h3>Transparência</h3>
-            <p>Orçamento em PDF antes de qualquer serviço, sem letras miúdas.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="container">
-        <div class="hero-panel" style="text-align:center; padding:40px 24px;">
-          <h3 style="font-size:20px; margin-bottom:10px">Quer marcar um horário?</h3>
-          <p style="font-size:13.5px; margin-bottom:20px">Veja o catálogo completo ou fale direto com a gente no WhatsApp.</p>
-          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
-            <a href="catalogo.html" class="btn primary">Ver catálogo</a>
-            <a href="#" class="btn whatsapp" id="sobre-wa">Chamar no WhatsApp</a>
+      <section>
+        <div class="container">
+          <div class="timeline-stat">
+            <div class="stat-box">
+              <div class="num">2</div>
+              <div class="lbl">catálogos, elétrica e T.I</div>
+            </div>
+            <div class="stat-box">
+              <div class="num">100%</div>
+              <div class="lbl">orçamento antes do serviço</div>
+            </div>
+            <div class="stat-box">
+              <div class="num">&lt; 2h</div>
+              <div class="lbl">resposta em emergências</div>
+            </div>
+            <div class="stat-box">
+              <div class="num">RMC</div>
+              <div class="lbl">Ponta Grossa e região metropolitana</div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <footer class="site-footer"><div id="site-footer"></div></footer>
-  <div id="wa-float-root"></div>
-  <div id="toast-root"></div>
+      <section style="padding-top: 0">
+        <div class="container">
+          <div class="feature-grid">
+            <div class="feature-card elec">
+              <div class="icon-box">
+                <span class="material-symbols-rounded">bolt</span>
+              </div>
+              <h3>Instalação</h3>
+              <p>
+                Tomadas, quadros, chuveiros, câmeras e tudo que envolve fiação e
+                segurança elétrica.
+              </p>
+            </div>
+            <div class="feature-card ti">
+              <div class="icon-box">
+                <span class="material-symbols-rounded">computer</span>
+              </div>
+              <h3>Configuração</h3>
+              <p>
+                PCs, redes, roteadores e switches — o que faz a instalação
+                elétrica valer a pena.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box" style="background: var(--surface-alt)">
+                <span class="material-symbols-rounded">assignment</span>
+              </div>
+              <h3>Transparência</h3>
+              <p>
+                Orçamento em PDF antes de qualquer serviço, sem letras miúdas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <script src="js/config.js"></script>
-  <script src="js/darkmode.js"></script>
-  <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/header.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("sobre-wa").href = gtkWhatsappLink();
-    });
-  </script>
-</body>
+      <section>
+        <div class="container">
+          <div
+            class="hero-panel"
+            style="text-align: center; padding: 40px 24px"
+          >
+            <h3 style="font-size: 20px; margin-bottom: 10px">
+              Quer marcar um horário?
+            </h3>
+            <p style="font-size: 13.5px; margin-bottom: 20px">
+              Veja o catálogo completo ou fale direto com a gente no WhatsApp.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+              "
+            >
+              <a href="catalogo.html" class="btn primary">Ver catálogo</a>
+              <a href="#" class="btn whatsapp" id="sobre-wa"
+                >Chamar no WhatsApp</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div id="site-footer"></div></footer>
+    <div id="wa-float-root"></div>
+    <div id="toast-root"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/header.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("sobre-wa").href = gtkWhatsappLink();
+      });
+    </script>
+  </body>
 </html>

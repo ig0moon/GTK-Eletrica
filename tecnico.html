@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel do Técnico — GTK Elétrica e Info</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="tecnico">
+    <header class="site-header"><div id="site-header"></div></header>
+
+    <main>
+      <!-- HERO DO TÉCNICO -->
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow" id="tecnico-especialidade-label"
+            >Área do Técnico</span
+          >
+          <h1 id="tecnico-nome">Painel do Técnico</h1>
+          <p>Acompanhe e atualize os agendamentos da sua especialidade.</p>
+        </div>
+      </section>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <section style="padding-top: 16px">
+        <div class="container">
+
+          <!-- NAVEGAÇÃO (ABAS) -->
+          <div class="help-cats">
+            <div
+              class="help-cat active"
+              id="tab-aguardando"
+              onclick="mudarFiltro('aguardando')"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="
+                  vertical-align: middle;
+                  margin-right: 6px;
+                  font-size: 20px;
+                "
+                >hourglass_empty</span
+              >
+              Aguardando confirmação
+            </div>
+            <div
+              class="help-cat"
+              id="tab-confirmado"
+              onclick="mudarFiltro('confirmado')"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="
+                  vertical-align: middle;
+                  margin-right: 6px;
+                  font-size: 20px;
+                "
+                >event_available</span
+              >
+              Confirmado
+            </div>
+            <div
+              class="help-cat"
+              id="tab-andamento"
+              onclick="mudarFiltro('andamento')"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="
+                  vertical-align: middle;
+                  margin-right: 6px;
+                  font-size: 20px;
+                "
+                >build</span
+              >
+              Em andamento
+            </div>
+            <div
+              class="help-cat"
+              id="tab-concluido"
+              onclick="mudarFiltro('concluido')"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="
+                  vertical-align: middle;
+                  margin-right: 6px;
+                  font-size: 20px;
+                "
+                >task_alt</span
+              >
+              Concluído
+            </div>
+            <div
+              class="help-cat"
+              id="tab-cancelado"
+              onclick="mudarFiltro('cancelado')"
+            >
+              <span
+                class="material-symbols-outlined"
+                style="
+                  vertical-align: middle;
+                  margin-right: 6px;
+                  font-size: 20px;
+                "
+                >cancel</span
+              >
+              Cancelado
+            </div>
+          </div>
+
+          <!-- PAINEL: LISTA DE AGENDAMENTOS -->
+          <div class="section-head">
+            <h2 id="tecnico-filtro-titulo">Aguardando confirmação</h2>
+            <p>Agendamentos da sua especialidade nesse filtro.</p>
+          </div>
+
+          <!-- Preenchido dinamicamente por js/tecnico.js -->
+          <div id="tecnico-lista"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div id="site-footer"></div></footer>
+    <div id="wa-float-root"></div>
+    <div id="toast-root"></div>
+
+    <!-- SCRIPTS -->
+    <script src="js/config.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/header.js"></script>
+
+    <!-- Script específico desta página -->
+    <script src="js/tecnico.js"></script>
+  </body>
+</html>
