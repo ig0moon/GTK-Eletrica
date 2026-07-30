@@ -68,11 +68,18 @@ window.cartCount = function() {
 };
 
 window.cartTotal = function() {
-  return window.getCart().reduce((sum, i) => sum + i.qty * i.price, 0);
+  return window.getCart().reduce((sum, i) => {
+    return typeof i.price === "number" ? sum + i.qty * i.price : sum;
+  }, 0);
 };
 
 window.formatBRL = function(value) {
+  if (typeof value !== "number") return "A combinar";
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
+
+window.cartHasQuoteItems = function() {
+  return window.getCart().some((i) => typeof i.price !== "number");
 };
 
 // ------------------------------------------------------------
@@ -141,10 +148,25 @@ window.renderCartPage = function() {
   ).join("");
 
   const subtotal = window.cartTotal();
+  const temOrcamento = window.cartHasQuoteItems();
+  const temItemFixo = window.getCart().some((i) => typeof i.price === "number");
+  
+  let totalTexto;
+  if (temItemFixo && temOrcamento) {
+    totalTexto = `${window.formatBRL(subtotal)} + a combinar`;
+  } else if (temItemFixo) {
+    totalTexto = window.formatBRL(subtotal);
+  } else if (temOrcamento) {
+    totalTexto = "A combinar";
+  } else {
+    totalTexto = window.formatBRL(0);
+  }
+  
   summaryRoot.innerHTML = `
     <div class="summary-row"><span>Itens (${window.cartCount()})</span><span>${window.formatBRL(subtotal)}</span></div>
     <div class="summary-row"><span>Visita técnica</span><span>A combinar</span></div>
-    <div class="summary-row total"><span>Total estimado</span><span>${window.formatBRL(subtotal)}</span></div>
+    ${temOrcamento ? `<div class="summary-row"><span>Itens a combinar</span><span>Orçamento à parte</span></div>` : ""}
+    <div class="summary-row total"><span>Total estimado</span><span>${totalTexto}</span></div>
   `;
 };
 

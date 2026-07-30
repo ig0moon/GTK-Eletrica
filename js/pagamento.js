@@ -63,8 +63,12 @@ function renderReviewStep() {
 
   // Renderização corrigida com Material Symbols
   root.innerHTML = cart
-    .map(
-      (i) => `<div class="cart-item">
+  .map(
+    (i) => {
+      const valorItem = typeof i.price === "number"
+        ? fmtMoney(i.price * i.qty)
+        : "A combinar";
+      return `<div class="cart-item">
       <div class="swatch" style="background:${i.category === "elec" ? "var(--elec-bg)" : "var(--ti-bg)"};color:${i.category === "elec" ? "var(--elec-ink)" : "var(--ti-ink)"}">
         <span class="material-symbols-outlined">${i.icon}</span>
       </div>
@@ -72,10 +76,11 @@ function renderReviewStep() {
         <h4>${i.name}</h4>
         <span>Qtd: ${i.qty}</span>
       </div>
-      <span class="mono">${fmtMoney(i.price * i.qty)}</span>
-    </div>`
-    )
-    .join("");
+      <span class="mono">${valorItem}</span>
+    </div>`;
+    }
+  )
+  .join("");
 }
 
 function renderSelectedSlotSummary() {
@@ -259,7 +264,10 @@ window.downloadOrcamentoPDF = function () {
     booking.itens.forEach((item) => {
       doc.text(item.name, 14, y);
       doc.text(String(item.qty), 143, y);
-      doc.text(fmtMoney(item.price * item.qty), 165, y);
+      const valorItem = typeof item.price === "number"
+        ? fmtMoney(item.price * item.qty)
+        : "A combinar";
+      doc.text(valorItem, 165, y);
       y += 7;
     });
   }

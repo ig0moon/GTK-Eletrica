@@ -3,8 +3,8 @@
 // ============================================================
 const MONTH_NAMES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const DOW_NAMES = ["D","S","T","Q","Q","S","S"];
-const ALL_SLOTS = ["08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"];
-const CAL_MAX_POR_HORARIO = 1; // aumente se tiver mais de um técnico por horário
+const ALL_SLOTS = ["09:00","13:00","17:00"];
+const CAL_MAX_POR_HORARIO = 2; // aumente se tiver mais de um técnico por horário
 
 let calState = {
   viewYear: new Date().getFullYear(),
@@ -76,7 +76,19 @@ async function fetchMonthBusyMap(year, month) {
 
 function getAvailableSlots(key) {
   const ocupados = calBusyMap[key] || {};
-  return ALL_SLOTS.filter((s) => (ocupados[s] || 0) < CAL_MAX_POR_HORARIO);
+  let slots = ALL_SLOTS.filter((s) => (ocupados[s] || 0) < CAL_MAX_POR_HORARIO);
+
+  const todayKey = dateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (key === todayKey) {
+    const agora = new Date();
+    const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+    slots = slots.filter((s) => {
+      const [h, m] = s.split(":").map(Number);
+      return h * 60 + m > minutosAgora;
+    });
+  }
+
+  return slots;
 }
 
 function isDayAvailable(y, m, d) {

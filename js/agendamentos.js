@@ -95,8 +95,8 @@ function renderAgendamentosLista(container, agendamentos) {
         ${
           podeExcluir
             ? `<button class="btn icon-btn sm" title="Excluir agendamento" onclick="excluirAgendamento('${ag.id}')">
-                 <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-               </button>`
+                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                </button>`
             : ""
         }
       </div>
