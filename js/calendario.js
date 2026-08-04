@@ -30,14 +30,14 @@ function injectCompactStyles(containerId) {
     #${containerId} .calendar-card { max-width: 300px; margin: 0 auto; padding: 14px; }
     #${containerId} .calendar-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
     #${containerId} .calendar-head h4 { font-size: 13px; margin: 0; text-transform: capitalize; }
-    #${containerId} .calendar-nav-btn { width: 26px; height: 26px; font-size: 13px; }
+    #${containerId} .calendar-nav-btn { color: var(--ink); width: 26px; height: 26px; font-size: 13px; }
     #${containerId} .calendar-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
     #${containerId} .dow { text-align:center; font-size: 10px; color: var(--ink-muted); padding-bottom: 3px; }
     #${containerId} .day { aspect-ratio: 1; display:flex; align-items:center; justify-content:center; font-size: 12px; border-radius: 6px; }
     #${containerId} .day.available { cursor: pointer; }
     #${containerId} .day.available:hover { border: 1px solid var(--border); }
     #${containerId} .day.unavailable { opacity: .35; }
-    #${containerId} .day.selected { background: var(--ink); color: #fff; }
+    #${containerId} .day.selected { background: var(--ink); color: var(--ink-muted); }
     #${containerId} .slot-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
     #${containerId} .slot-btn { padding: 7px 4px; font-size: 12px; }
   `;

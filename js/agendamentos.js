@@ -25,11 +25,11 @@
 
 const AGENDAMENTOS_STATUS_BADGE_CLASS = {
   "Aguardando confirmação": "aguardando",
-  "Confirmado": "confirmado",
+  Confirmado: "confirmado",
   "Aguardando técnico": "aguardando",
   "Em andamento": "andamento",
-  "Concluído": "concluido",
-  "Cancelado": "cancelado",
+  Concluído: "concluido",
+  Cancelado: "cancelado",
 };
 
 // status que vão para a aba "Histórico"
@@ -99,7 +99,10 @@ function renderAgendamentosTabs() {
   const tabAtivos = document.getElementById("tab-ativos");
   const tabHistorico = document.getElementById("tab-historico");
   if (tabAtivos)
-    tabAtivos.classList.toggle("active", agendamentosState.filtroAtivo === "ativos");
+    tabAtivos.classList.toggle(
+      "active",
+      agendamentosState.filtroAtivo === "ativos",
+    );
   if (tabHistorico)
     tabHistorico.classList.toggle(
       "active",
@@ -131,14 +134,24 @@ function renderAgendamentosLista(container, agendamentos) {
       const d = ag.detalhes || {};
       const cliente = d.cliente || {};
       const fmtDate = formatDataAgendamento(d.data);
-      const shortId = String(ag.id).substring(0, 8);
-      const badgeClass = AGENDAMENTOS_STATUS_BADGE_CLASS[ag.status] || "aguardando";
+      const badgeClass =
+        AGENDAMENTOS_STATUS_BADGE_CLASS[ag.status] || "aguardando";
       const podeExcluir = !historico && ag.status !== "Concluído";
+
+      // Lógica para exibir a OS formatada ou o ID antigo como fallback
+      let displayId = "";
+      if (ag.ordem_servico) {
+        displayId = "OS-" + String(ag.ordem_servico).padStart(4, "0");
+      } else {
+        displayId = "#" + String(ag.id).substring(0, 8);
+      }
 
       const itensHTML = (ag.itens || [])
         .map((i) => {
           const valor =
-            typeof i.price === "number" ? formatBRLLocal(i.price) : "A combinar";
+            typeof i.price === "number"
+              ? formatBRLLocal(i.price)
+              : "A combinar";
           return `<li><span>${i.name} <strong>×${i.qty}</strong></span><span>${valor}</span></li>`;
         })
         .join("");
@@ -146,7 +159,7 @@ function renderAgendamentosLista(container, agendamentos) {
       return `
         <div class="agendamento-card" data-agendamento-id="${ag.id}">
           <div class="agendamento-top">
-            <span class="agendamento-id">#${shortId}</span>
+            <span class="agendamento-id">${displayId}</span>
             <span class="status-badge ${badgeClass}">${ag.status || "-"}</span>
           </div>
 
@@ -156,6 +169,11 @@ function renderAgendamentosLista(container, agendamentos) {
           </div>
 
           <div class="agendamento-body" style="margin-top:14px">
+            <!-- NOVO: Bloco mostrando o nome do titular do agendamento -->
+            <div class="info-block" style="margin-bottom:8px">
+              <label>Cliente</label>
+              <span>${cliente.nome || "-"}</span>
+            </div>
             <div class="info-block">
               <label>Endereço</label>
               <span>${cliente.endereco || "-"}</span>
@@ -261,7 +279,9 @@ async function excluirAgendamento(id) {
     return;
   }
 
-  agendamentosState.todos = agendamentosState.todos.filter((ag) => ag.id !== id);
+  agendamentosState.todos = agendamentosState.todos.filter(
+    (ag) => ag.id !== id,
+  );
 
   const item = document.querySelector(`[data-agendamento-id="${id}"]`);
   if (item) {

@@ -187,7 +187,15 @@ function renderListaAgendamentos() {
       const cliente = d.cliente || {};
       const fmtDate =
         typeof formatDatePtBr === "function" ? formatDatePtBr(d.data) : d.data;
-      const shortId = String(ag.id).substring(0, 8);
+      
+      // NOVO: Lógica da Ordem de Serviço
+      let displayId = "";
+      if (ag.ordem_servico) {
+        displayId = "OS-" + String(ag.ordem_servico).padStart(4, '0');
+      } else {
+        displayId = "#" + String(ag.id).substring(0, 8);
+      }
+
       const badgeClass = STATUS_BADGE_CLASS[ag.status] || "aguardando";
 
       const itensHTML = (ag.itens || [])
@@ -214,7 +222,7 @@ function renderListaAgendamentos() {
       return `
         <div class="agendamento-card">
           <div class="agendamento-top">
-            <span class="agendamento-id">#${shortId}</span>
+            <span class="agendamento-id">${displayId}</span>
             <span class="status-badge ${badgeClass}">${ag.status || "-"}</span>
           </div>
 
@@ -224,10 +232,10 @@ function renderListaAgendamentos() {
           </div>
 
           <div class="agendamento-body" style="margin-top:14px">
-            <div class="info-block">
+            <div class="info-block" style="margin-bottom:8px">
               <label>Cliente</label>
               <span>${cliente.nome || "-"}</span><br>
-              <span>${cliente.telefone || "-"}</span>
+              <span style="color:var(--ink-muted); font-size: 13.5px;">${cliente.telefone || "-"}</span>
             </div>
             <div class="info-block">
               <label>Endereço</label>
