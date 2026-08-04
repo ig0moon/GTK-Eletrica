@@ -88,11 +88,24 @@ window.cartHasQuoteItems = function () {
 // ------------------------------------------------------------
 
 window.updateCartBadge = function () {
-  const badge = document.getElementById("cart-count");
-  if (!badge) return;
   const count = window.cartCount();
-  badge.textContent = count;
-  badge.classList.toggle("hidden", count === 0);
+  
+  // Atualiza o carrinho lá no Header (topo)
+  const badge = document.getElementById("cart-count");
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.toggle("hidden", count === 0);
+  }
+
+  // Atualiza e controla a exibição do botão flutuante
+  const floatBtn = document.getElementById("floating-cart-btn");
+  const floatBadge = document.getElementById("floating-cart-count");
+  
+  if (floatBtn && floatBadge) {
+    floatBadge.textContent = count;
+    // Só mostra o botão flutuante se tiver algo no carrinho!
+    floatBtn.style.display = count > 0 ? "flex" : "none";
+  }
 };
 
 window.renderCartPage = function () {
@@ -176,10 +189,74 @@ window.renderCartPage = function () {
   `;
 };
 
-// ------------------------------------------------------------
-// INICIALIZAÇÃO
-// ------------------------------------------------------------
+// Função que injeta o botão flutuante em todas as páginas
+window.injectFloatingCart = function() {
+  // Se já estivermos na página do carrinho, não precisa do botão flutuante
+  if (document.body.getAttribute('data-page') === 'carrinho') return;
+
+  // Evita criar o botão duplicado
+  if (document.getElementById('floating-cart-btn')) return;
+
+  const btn = document.createElement('a');
+  btn.id = 'floating-cart-btn';
+  btn.href = 'carrinho.html';
+  
+  // Estilo do botão embutido (fica logo acima do WhatsApp no canto direito)
+  btn.style.cssText = `
+    position: fixed;
+    bottom: 90px; /* Altura ideal para não sobrepor o WhatsApp */
+    right: 20px;
+    background-color: var(--ink); /* Usa a cor principal do seu tema */
+    color: var(--bg);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 998;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    display: none; /* Começa oculto até o JS verificar se tem itens */
+  `;
+
+  // HTML interno do botão (Ícone + Bolinha vermelha)
+  btn.innerHTML = `
+    <span class="material-symbols-outlined" style="font-size: 24px;">shopping_cart</span>
+    <span id="floating-cart-count" style="
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger, #e74c3c);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg);
+    ">0</span>
+  `;
+
+  // Efeito de pulo ao passar o mouse (desktop)
+  btn.onmouseenter = () => btn.style.transform = "scale(1.08)";
+  btn.onmouseleave = () => btn.style.transform = "scale(1)";
+
+  document.body.appendChild(btn);
+};
+
+// ============================================================
+// INICIALIZAÇÃO DO CARRINHO
+// ============================================================
 document.addEventListener("DOMContentLoaded", () => {
-  window.updateCartBadge();
-  window.renderCartPage();
+  window.injectFloatingCart(); // Cria o botão
+  window.updateCartBadge();    // Atualiza contagens e mostra se necessário
+  
+  if (typeof window.renderCartPage === "function") {
+    window.renderCartPage();
+  }
 });
